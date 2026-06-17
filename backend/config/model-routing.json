@@ -1,0 +1,84 @@
+{
+  "version": 1,
+  "enabled": false,
+  "defaultRoute": "high_risk",
+  "fallbackModel": "openai/gpt-4.1-mini",
+  "logPath": "~/.openclaw/logs/dorothy-model-routing.jsonl",
+  "routes": {
+    "fast_background": {
+      "model": "ollama/qwen3.5:9b",
+      "riskLevel": "low",
+      "use": "local",
+      "reason": "Low-risk classification, triage, or simple summarization."
+    },
+    "heavy_local": {
+      "model": "ollama/qwen3:14b",
+      "riskLevel": "medium",
+      "use": "local",
+      "reason": "Local reasoning for digest, prioritization, or project synthesis."
+    },
+    "coding": {
+      "model": "ollama/qwen2.5-coder:32b",
+      "riskLevel": "medium",
+      "use": "local",
+      "reason": "Developer task that benefits from the dedicated local coding model."
+    },
+    "high_risk": {
+      "model": "openai/gpt-4.1-mini",
+      "riskLevel": "high",
+      "use": "gpt",
+      "reason": "Client-facing, sensitive, ambiguous, or potentially consequential request."
+    }
+  },
+  "rules": {
+    "highRisk": {
+      "patterns": [
+        "\\b(draft|write|compose|reply|respond|answer)\\b.{0,80}\\b(client|customer|email|mail|invoice|payment|sensitive)\\b",
+        "\\b(client|customer|email|mail|invoice|payment|sensitive)\\b.{0,80}\\b(draft|write|compose|reply|respond|answer)\\b",
+        "\\b(send|archive|delete|move|modify|rename|overwrite|purchase|pay|transfer|book|cancel)\\b",
+        "\\b(files?|browser|email|mail|calendar|client communication)\\b.{0,80}\\b(change|edit|update|act|execute|do it)\\b"
+      ],
+      "contextFlags": [
+        "clientFacing",
+        "sensitive",
+        "externalAction",
+        "toolUseDecision",
+        "hasAttachments"
+      ]
+    },
+    "coding": {
+      "patterns": [
+        "\\b(code review|review this code|debug|debugging|stack trace|exception|refactor|unit test|integration test)\\b",
+        "\\b(script|function|class|api|sql|php|javascript|typescript|node\\.js|docker|git)\\b.{0,80}\\b(write|implement|fix|review|debug|test|optimize)\\b",
+        "\\b(write|implement|fix|review|debug|test|optimize)\\b.{0,80}\\b(script|function|class|api|sql|php|javascript|typescript|node\\.js|docker|git)\\b"
+      ],
+      "contextFlags": [
+        "coding"
+      ]
+    },
+    "heavyLocal": {
+      "patterns": [
+        "\\b(daily|weekly|morning)\\b.{0,40}\\b(inbox|email|project)\\b.{0,40}\\b(digest|summary|prioritization|prioritize)\\b",
+        "\\b(digest|prioritize|prioritization|rank priorities|what should .* do first|what should i do first|project summary|project summaries)\\b"
+      ],
+      "contextFlags": [
+        "heavyReasoning",
+        "prioritization"
+      ]
+    },
+    "fastBackground": {
+      "patterns": [
+        "\\b(classify|classification|tag|label|categorize|triage)\\b",
+        "\\b(urgent|noise|reply[- ]needed|needs? (a )?reply|payment[- ]related)\\b",
+        "\\b(notification|inbox|email|mail)\\b.{0,50}\\b(triage|classify|tag|label|urgent|noise)\\b",
+        "\\b(simple|short|brief)\\b.{0,30}\\b(summary|summarize)\\b"
+      ],
+      "contextFlags": [
+        "background",
+        "classification",
+        "notificationTriage",
+        "simpleSummary"
+      ]
+    }
+  }
+}

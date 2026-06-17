@@ -1,0 +1,32 @@
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Build output
+dist/
+**/dist/
+*.tsbuildinfo
+
+# Secrets & local env
+.env
+.env.*
+!.env.example
+!.env.automation.example
+*.pem
+secrets/
+
+# Local data / runtime state
+*.sqlite
+*.sqlite-*
+*.log
+data/
+dorothy_db/
+piper_models/
+
+# OS / editor noise
+.DS_Store
+**/.DS_Store
+__pycache__/
+*.pyc
+.vscode/
+.idea/

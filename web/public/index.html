@@ -1,0 +1,802 @@
+<!doctype html>
+<html lang="el">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,shrink-to-fit=no,viewport-fit=cover">
+  <meta name="theme-color" content="#0c0d10">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Dorothy">
+  <meta name="mobile-web-app-capable" content="yes">
+  <link rel="icon" href="/icon.svg?v=3.3.2" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=3.3.2">
+  <link rel="apple-touch-startup-image" href="/icon-512x512.png?v=3.3.2">
+  <title>Dorothy</title>
+  <link rel="manifest" href="/manifest.json?v=3.3.2">
+  <link rel="stylesheet" href="/style.css?v=3.3.2">
+</head>
+<body>
+  <div class="app-shell">
+    <aside id="sidebar" class="sidebar" aria-label="Συζητήσεις">
+      <div class="sidebar-header">
+        <div class="sidebar-brand">
+          <img src="/logo.png" alt="" class="sidebar-logo">
+          <span>Dorothy</span>
+          <span class="brand-version">3.0</span>
+        </div>
+        <button id="closeSidebarBtn" class="icon-btn sidebar-close" type="button" aria-label="Κλείσιμο μενού">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
+        </button>
+      </div>
+      <button id="sidebarNewChatBtn" class="sidebar-new" type="button">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+        Νέα συζήτηση
+      </button>
+      <nav class="sidebar-primary" aria-label="Κύρια πλοήγηση">
+        <button id="sidebarTodayNav" class="sidebar-nav-item active" type="button" data-feature-view="today">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10.5 12 4l8 6.5V20H4z"/><path d="M9 20v-6h6v6"/></svg>
+          <span>Σήμερα</span>
+        </button>
+        <button id="sidebarChatNav" class="sidebar-nav-item" type="button">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5h14v10H9l-4 4V5Z"/></svg>
+          <span>Συζητήσεις</span>
+        </button>
+        <button id="sidebarSpotlightNav" class="sidebar-nav-item" type="button" data-feature-view="spotlight">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 4 4"/></svg>
+          <span>Spotlight</span><kbd>⌘K</kbd>
+        </button>
+        <button id="sidebarCommunicationsNav" class="sidebar-nav-item" type="button" data-feature-view="communications">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16v12H4z"/><path d="m4 7 8 6 8-6"/></svg>
+          <span>Επικοινωνίες</span>
+        </button>
+        <button id="sidebarDocumentsNav" class="sidebar-nav-item" type="button" data-feature-view="documents">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v5h5"/></svg>
+          <span>Έγγραφα</span>
+        </button>
+        <button id="sidebarBrowserNav" class="sidebar-nav-item" type="button" data-feature-view="browser">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/></svg>
+          <span>Browser</span>
+        </button>
+        <button id="sidebarMeetingsNav" class="sidebar-nav-item" type="button" data-feature-view="meetings">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5h14v15H5zM8 3v4m8-4v4M5 9h14"/></svg>
+          <span>Συναντήσεις</span>
+        </button>
+        <button id="sidebarProjectsNav" class="sidebar-nav-item" type="button" data-feature-view="projects">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h7l2 2h9v11H3z"/><path d="M3 7V5h7l2 2"/></svg>
+          <span>Projects</span>
+        </button>
+        <button id="sidebarAnalyticsNav" class="sidebar-nav-item" type="button" data-feature-view="analytics">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19V9m7 10V5m7 14v-9"/><path d="M3 21h18"/></svg>
+          <span>Analytics</span>
+        </button>
+        <button id="sidebarFinanceNav" class="sidebar-nav-item" type="button">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19V9m7 10V5m7 14v-7"/></svg>
+          <span>Οικονομικά</span>
+        </button>
+      </nav>
+      <div class="sidebar-label">Συζητήσεις</div>
+      <nav id="sessionList" class="session-list"></nav>
+      <div class="sidebar-footer">
+        <span class="sidebar-status-dot"></span>
+        <span><strong>Ελεγχόμενη πρόσβαση</strong><small>Τοπικά ή μέσω API, ανά mode και μοντέλο</small></span>
+      </div>
+    </aside>
+    <button id="sidebarScrim" class="sidebar-scrim" type="button" aria-label="Κλείσιμο μενού"></button>
+
+    <dialog id="modeDialog" class="mode-dialog" aria-labelledby="modeDialogTitle">
+      <form id="modeForm" class="mode-form">
+        <header class="mode-dialog-header">
+          <div>
+            <p>Νέα συνομιλία</p>
+            <h2 id="modeDialogTitle">Διάλεξε mode</h2>
+          </div>
+          <button id="closeModeDialogBtn" class="icon-btn" type="button" aria-label="Κλείσιμο">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
+          </button>
+        </header>
+        <div id="modeOptions" class="mode-options" role="radiogroup" aria-label="Chat mode"></div>
+        <label id="aiModelField" class="ai-model-field hidden" for="aiModelSelect">
+          <span>Μοντέλο AI</span>
+          <select id="aiModelSelect"></select>
+          <small>Gemini ή local. Η επιλογή μένει σε αυτή τη συζήτηση.</small>
+        </label>
+        <footer class="mode-dialog-actions">
+          <button id="cancelModeBtn" class="mode-cancel" type="button">Άκυρο</button>
+          <button class="mode-create" type="submit">Έναρξη</button>
+        </footer>
+      </form>
+    </dialog>
+
+    <main class="app">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button id="menuBtn" class="icon-btn menu-btn" type="button" aria-label="Άνοιγμα συζητήσεων">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+        </button>
+        <div class="logo-wrap">
+          <img src="/logo.png" alt="Dorothy" class="logo">
+        </div>
+        <div class="topbar-copy">
+          <span class="topbar-title">Dorothy <span class="mobile-version">3.0</span></span>
+          <span class="conversation-line">
+            <span id="conversationTitle" class="conversation-title">Νέα συζήτηση</span>
+            <span id="conversationMode" class="conversation-mode hidden">Ψηφιακή μνήμη</span>
+          </span>
+        </div>
+        <span id="connectionStatus" class="connection-status" data-state="idle">
+          <span class="status-dot"></span>
+          <span id="connectionLabel">Έτοιμη</span>
+        </span>
+      </div>
+      <div class="topbar-actions">
+        <div class="control-center-wrap">
+          <button
+            id="controlCenterBtn"
+            class="icon-btn control-center-trigger"
+            type="button"
+            title="Control Center"
+            aria-label="Άνοιγμα Control Center"
+            aria-controls="controlCenter"
+            aria-expanded="false"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v8"/><path d="M7.1 5.8a8 8 0 1 0 9.8 0"/></svg>
+          </button>
+          <section id="controlCenter" class="control-center hidden" role="dialog" aria-label="Mac Control Center">
+            <header class="control-center-header">
+              <div>
+                <h2>Control Center</h2>
+                <p id="controlCenterSummary">Έλεγχος κατάστασης…</p>
+              </div>
+              <span id="controlCenterState" class="control-center-state" data-state="checking">
+                <i></i><span>Checking</span>
+              </span>
+            </header>
+
+            <div class="control-center-grid">
+              <button type="button" data-control-kind="power" data-control-action="lock">
+                <span class="control-icon">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+                </span>
+                <strong>Lock</strong>
+                <small>Κλείδωμα οθόνης</small>
+              </button>
+              <button type="button" data-control-kind="power" data-control-action="restart">
+                <span class="control-icon">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg>
+                </span>
+                <strong>Restart</strong>
+                <small>Επανεκκίνηση Mac</small>
+              </button>
+              <button type="button" class="danger" data-control-kind="power" data-control-action="shutdown">
+                <span class="control-icon">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v9"/><path d="M6.6 6.5a8 8 0 1 0 10.8 0"/></svg>
+                </span>
+                <strong>Shutdown</strong>
+                <small>Τερματισμός Mac</small>
+              </button>
+              <button id="gatewayControlBtn" type="button" class="kill" data-control-kind="gateway" data-control-action="stop">
+                <span class="control-icon">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h10v10H7z"/><path d="M9 3v4m6-4v4M9 17v4m6-4v4M3 9h4m10 0h4M3 15h4m10 0h4"/></svg>
+                </span>
+                <strong data-gateway-label>Kill Dorothy</strong>
+                <small data-gateway-detail>Stop OpenClaw</small>
+              </button>
+            </div>
+
+            <div id="controlConfirm" class="control-confirm hidden" role="alertdialog" aria-labelledby="controlConfirmTitle">
+              <div>
+                <strong id="controlConfirmTitle">Επιβεβαίωση</strong>
+                <p id="controlConfirmText"></p>
+              </div>
+              <div class="control-confirm-actions">
+                <button id="cancelControlBtn" type="button">Άκυρο</button>
+                <button id="confirmControlBtn" type="button">Επιβεβαίωση</button>
+              </div>
+            </div>
+            <p id="controlCenterStatus" class="control-center-status" role="status" aria-live="polite"></p>
+          </section>
+        </div>
+        <button id="globalSearchBtn" class="global-search-trigger" type="button" aria-label="Άνοιγμα Spotlight">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 4 4"/></svg>
+          <span>Spotlight</span><kbd>⌘K</kbd>
+        </button>
+        <button id="voiceModeBtn" class="icon-btn" title="Voice mode" aria-label="Voice mode">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h2m3-5v10m4-13v16m4-12v8m3-4h1"/></svg>
+        </button>
+        <button id="liveVoiceBtn" class="icon-btn" title="Ζωντανή συνομιλία (hands-free)" aria-label="Ζωντανή συνομιλία">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>
+        </button>
+        <div class="notif-wrap">
+          <button id="notifBtn" class="icon-btn notif-btn" title="Ειδοποιήσεις" aria-label="Ειδοποιήσεις" aria-haspopup="true" aria-expanded="false">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+            <span id="notifBadge" class="notif-badge hidden">0</span>
+          </button>
+          <div id="notifPanel" class="notif-panel hidden" role="dialog" aria-label="Ειδοποιήσεις">
+            <header class="notif-panel-head">
+              <span>Ειδοποιήσεις</span>
+              <button id="notifReadAll" type="button" class="notif-readall">Όλα ως διαβασμένα</button>
+            </header>
+            <div id="notifList" class="notif-list"></div>
+            <footer class="notif-panel-foot">
+              <button id="notifClear" type="button" class="notif-clear">Καθαρισμός</button>
+            </footer>
+          </div>
+        </div>
+        <button id="newChatBtn" class="icon-btn" title="Νέα συζήτηση" aria-label="Νέα συζήτηση">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+        </button>
+        <button id="settingsBtn" class="icon-btn" title="Ρυθμίσεις" aria-label="Ρυθμίσεις">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.25"/><path d="M19 12a7 7 0 0 0-.1-1.2l2-1.5-2-3.4-2.4 1A7 7 0 0 0 14.4 5L14 2h-4l-.4 3a7 7 0 0 0-2.1.9l-2.4-1-2 3.4 2 1.5A7 7 0 0 0 5 12c0 .4 0 .8.1 1.2l-2 1.5 2 3.4 2.4-1a7 7 0 0 0 2.1.9l.4 3h4l.4-3a7 7 0 0 0 2.1-.9l2.4 1 2-3.4-2-1.5c.1-.4.1-.8.1-1.2Z"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <section id="loginPanel" class="panel login-panel">
+      <div class="badge">Private access</div>
+      <h2>Σύνδεση</h2>
+      <p>Βάλε το private token σου. Αποθηκεύεται μόνο στη συσκευή σου.</p>
+      <input id="tokenInput" type="password" placeholder="Dorothy token" autocomplete="current-password">
+      <button id="saveTokenBtn" class="primary">Σύνδεση</button>
+      <div id="loginError" class="login-error" role="alert"></div>
+    </section>
+
+    <section id="chatPanel" class="chat-panel hidden">
+      <div id="messages" class="messages"></div>
+
+      <div class="command-dock">
+        <div class="quick-actions">
+          <div class="quick-actions-primary">
+            <button data-prompt="Σκάναρε τις επικοινωνίες μου για πραγματικές εκκρεμότητες και κατέγραψέ τες σωστά σε Apple Notes με Reminder ή Calendar όπου χρειάζεται.">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 11.5 11 13.5 15.5 8.5"/><path d="M5 4h14v16H5zM8 4V2m8 2V2"/></svg>
+              <span>Εκκρεμότητες</span>
+            </button>
+            <button class="attention-action" data-comms="attention">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 21 19H3L12 3Z"/><path d="M12 9v4m0 3h.01"/></svg>
+              <span>Προσοχή</span>
+            </button>
+            <button data-comms="replies">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 8-5 4 5 4"/><path d="M5 12h8a6 6 0 0 1 6 6v1"/></svg>
+              <span>Απαντήσεις</span>
+            </button>
+            <button data-comms="today">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5h14v15H5zM8 3v4m8-4v4M5 9h14"/></svg>
+              <span>Σήμερα</span>
+            </button>
+          </div>
+          <details class="quick-actions-more">
+            <summary>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg>
+              <span>Περισσότερα</span>
+            </summary>
+            <div class="quick-actions-secondary">
+              <button data-prompt="Τι έχω στο ημερολόγιο τις επόμενες 24 ώρες;">Ημερολόγιο</button>
+              <button data-prompt="Βοήθησέ με να βρω ένα αρχείο. Ρώτησέ με τι ψάχνω.">Αρχεία</button>
+              <button data-prompt="Βάλε λίγη μουσική.">Μουσική</button>
+            </div>
+          </details>
+        </div>
+
+        <form id="chatForm" class="composer">
+          <button id="voiceBtn" class="round" type="button" title="Voice input" aria-label="Φωνητική εισαγωγή">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3M8 21h8"/></svg>
+          </button>
+          <textarea id="messageInput" rows="1" placeholder="Μίλα ή γράψε στη Dorothy…"></textarea>
+          <button class="send" type="submit" title="Send (Enter)" aria-label="Αποστολή">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 5 16 7-16 7 3-7-3-7Z"/><path d="M7 12h13"/></svg>
+          </button>
+        </form>
+      </div>
+    </section>
+
+    <section id="workspacePanel" class="workspace-panel hidden" aria-live="polite"></section>
+
+    <section id="financePanel" class="finance-panel hidden" aria-labelledby="financeTitle">
+      <div class="finance-scroll">
+        <header class="finance-header">
+          <div>
+            <p class="finance-kicker">Open Banking · Elorus + MyDash</p>
+            <h1 id="financeTitle">Οικονομικά</h1>
+            <div class="finance-provenance">
+              <span>Έσοδα <strong>Elorus</strong></span>
+              <span>Κόστη <strong>MyDash</strong></span>
+              <span id="financeSyncMeta">Αναμονή συγχρονισμού</span>
+            </div>
+          </div>
+          <div class="finance-controls">
+            <label for="financeYear">Έτος</label>
+            <select id="financeYear" aria-label="Έτος οικονομικής αναφοράς"></select>
+            <button id="refreshFinanceBtn" class="finance-refresh" type="button" aria-label="Συγχρονισμός Elorus και ανανέωση οικονομικών" title="Συγχρονισμός Elorus">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.34 5.66M20 4v7h-7"/></svg>
+            </button>
+          </div>
+        </header>
+
+        <div id="financeStatus" class="finance-status" role="status" aria-live="polite">Φόρτωση οικονομικών…</div>
+
+        <div id="financeContent" class="finance-content hidden">
+          <section class="banking-section" aria-labelledby="bankingTitle">
+            <div class="banking-heading">
+              <div>
+                <span class="finance-card-eyebrow">Read-only open banking</span>
+                <h2 id="bankingTitle">Τραπεζική εικόνα</h2>
+                <p id="bankSyncMeta">Δεν έχει γίνει ακόμη συγχρονισμός.</p>
+              </div>
+              <button id="syncBanksBtn" class="bank-sync-button" type="button">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.34 5.66M20 4v7h-7"/></svg>
+                <span>Συγχρονισμός τραπεζών</span>
+              </button>
+            </div>
+
+            <div class="bank-metrics">
+              <article>
+                <span>Διαθέσιμα EUR</span>
+                <strong id="bankCashBalance">—</strong>
+                <small id="bankAccountsMeta">—</small>
+              </article>
+              <article>
+                <span>Εισροές 30 ημερών</span>
+                <strong id="bankInflows">—</strong>
+                <small>Καταγεγραμμένες πιστώσεις</small>
+              </article>
+              <article>
+                <span>Εκροές 30 ημερών</span>
+                <strong id="bankOutflows">—</strong>
+                <small>Καταγεγραμμένες χρεώσεις</small>
+              </article>
+              <article>
+                <span>Καθαρή ροή</span>
+                <strong id="bankNetFlow">—</strong>
+                <small id="bankTransactionsMeta">—</small>
+              </article>
+            </div>
+
+            <section class="portfolio-section" aria-labelledby="portfolioTitle">
+              <div class="finance-section-label portfolio-section-label">
+                <span id="portfolioTitle">Χαρτοφυλάκιο</span>
+                <small>Θέσεις από τη μνήμη της Dorothy</small>
+              </div>
+              <article class="finance-card portfolio-card">
+                <div class="portfolio-summary">
+                  <div>
+                    <span class="finance-card-eyebrow">Τρέχουσα αξία θέσεων</span>
+                    <strong id="portfolioTotalValue">—</strong>
+                    <small id="portfolioDayChange">Αναμονή τιμών αγοράς</small>
+                  </div>
+                  <div class="portfolio-source">
+                    <span id="portfolioMarketStatus">—</span>
+                    <small id="portfolioMeta">Οι τιμές μπορεί να έχουν καθυστέρηση.</small>
+                  </div>
+                </div>
+                <div id="portfolioPositions" class="portfolio-positions"></div>
+              </article>
+            </section>
+
+            <div class="banking-grid">
+              <article class="finance-card bank-accounts-card">
+                <div class="finance-card-heading">
+                  <div>
+                    <span class="finance-card-eyebrow">5 συνδέσεις</span>
+                    <h2>Λογαριασμοί</h2>
+                  </div>
+                </div>
+                <div id="bankAccountsList" class="bank-accounts-list"></div>
+              </article>
+
+              <article class="finance-card bank-categories-card">
+                <div class="finance-card-heading">
+                  <div>
+                    <span class="finance-card-eyebrow">Τελευταίες 30 ημέρες</span>
+                    <h2>Πού φεύγουν</h2>
+                  </div>
+                </div>
+                <div id="bankCategoriesList" class="bank-categories-list"></div>
+              </article>
+            </div>
+
+            <article class="finance-card bank-transactions-card">
+              <div class="finance-card-heading">
+                <div>
+                  <span class="finance-card-eyebrow">Ενοποιημένη ροή</span>
+                  <h2>Πρόσφατες κινήσεις</h2>
+                </div>
+              </div>
+              <div id="bankTransactionsList" class="bank-transactions-list"></div>
+            </article>
+          </section>
+
+          <div class="finance-section-label">
+            <span>Επιχειρηματική απόδοση</span>
+            <small>Elorus + MyDash</small>
+          </div>
+
+          <section class="finance-metrics" aria-label="Βασικοί δείκτες">
+            <article class="metric-card">
+              <span class="metric-label">Έσοδα net</span>
+              <strong id="metricRevenue">—</strong>
+              <small id="metricRevenueMeta">—</small>
+            </article>
+            <article class="metric-card">
+              <span class="metric-label">Άμεσα κόστη</span>
+              <strong id="metricDirectCosts">—</strong>
+              <small id="metricCostsMeta">—</small>
+            </article>
+            <article class="metric-card">
+              <span class="metric-label">Μικτό κέρδος</span>
+              <strong id="metricGrossProfit">—</strong>
+              <small id="metricGrossMargin">—</small>
+            </article>
+            <article class="metric-card featured">
+              <span class="metric-label">Λειτουργικό αποτέλεσμα</span>
+              <strong id="metricOperatingResult">—</strong>
+              <small id="metricOperatingMargin">—</small>
+            </article>
+          </section>
+
+          <div class="finance-grid finance-grid-top">
+            <article class="finance-card chart-card">
+              <div class="finance-card-heading">
+                <div>
+                  <span class="finance-card-eyebrow">Ιστορικό</span>
+                  <h2>Έσοδα &amp; αποτέλεσμα ανά έτος</h2>
+                </div>
+                <div class="chart-legend">
+                  <span><i class="legend-revenue"></i>Έσοδα</span>
+                  <span><i class="legend-result"></i>Αποτέλεσμα</span>
+                </div>
+              </div>
+              <div id="financeChart" class="finance-chart" aria-label="Γράφημα εσόδων και λειτουργικού αποτελέσματος"></div>
+            </article>
+
+            <article class="finance-card renewals-card">
+              <div class="finance-card-heading">
+                <div>
+                  <span class="finance-card-eyebrow">Επόμενες 90 ημέρες</span>
+                  <h2>Υποψήφιες ανανεώσεις</h2>
+                </div>
+                <span id="renewalsCount" class="finance-count">0</span>
+              </div>
+              <div id="renewalsList" class="renewals-list"></div>
+            </article>
+          </div>
+
+          <div class="finance-grid finance-grid-bottom">
+            <article class="finance-card categories-card">
+              <div class="finance-card-heading">
+                <div>
+                  <span class="finance-card-eyebrow">Ανά κατηγορία</span>
+                  <h2>Κερδοφορία</h2>
+                </div>
+              </div>
+              <div class="finance-table-wrap">
+                <table class="finance-table">
+                  <thead>
+                    <tr>
+                      <th>Κατηγορία</th>
+                      <th>Έσοδα</th>
+                      <th>Κόστος</th>
+                      <th>Κέρδος</th>
+                      <th>Margin</th>
+                      <th>Πηγή κόστους</th>
+                    </tr>
+                  </thead>
+                  <tbody id="financeCategories"></tbody>
+                </table>
+              </div>
+            </article>
+
+            <aside class="finance-card quality-card">
+              <div class="finance-card-heading">
+                <div>
+                  <span class="finance-card-eyebrow">Διαφάνεια</span>
+                  <h2>Ποιότητα δεδομένων</h2>
+                </div>
+              </div>
+              <div class="quality-stat">
+                <span>Ανάλυση γραμμών</span>
+                <strong id="qualityItems">—</strong>
+              </div>
+              <div class="quality-bar"><i id="qualityItemsBar"></i></div>
+              <div class="quality-stat">
+                <span>Έσοδα με πραγματικό category cost</span>
+                <strong id="qualityCosts">—</strong>
+              </div>
+              <div class="quality-bar"><i id="qualityCostsBar"></i></div>
+              <div class="quality-note">
+                <strong>Managerial estimate, όχι λογιστική κατάσταση.</strong>
+                <span id="qualityNote">Τα ποσά συνδυάζουν πραγματικά και εκτιμώμενα κόστη.</span>
+              </div>
+              <div class="tax-outflow">
+                <span>ΦΠΑ / φορολογικές εκροές</span>
+                <strong id="metricTaxOutflows">—</strong>
+                <small>Εμφανίζονται χωριστά από το λειτουργικό αποτέλεσμα.</small>
+              </div>
+            </aside>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <dialog id="settingsDialog">
+      <form method="dialog" class="settings">
+        <div class="settings-header">
+          <h2>Ρυθμίσεις</h2>
+          <button class="icon-btn" id="closeSettingsBtn" type="button" aria-label="Κλείσιμο">✕</button>
+        </div>
+
+        <div class="settings-body">
+          <nav class="settings-tabs" aria-label="Κατηγορίες ρυθμίσεων">
+            <button type="button" class="settings-tab active" data-tab="appearance">
+              <span class="settings-tab-icon">◐</span><span>Εμφάνιση</span>
+            </button>
+            <button type="button" class="settings-tab" data-tab="voice">
+              <span class="settings-tab-icon">◖</span><span>Φωνή</span>
+            </button>
+            <button type="button" class="settings-tab" data-tab="mac">
+              <span class="settings-tab-icon">⌘</span><span>Mac</span>
+            </button>
+            <button type="button" class="settings-tab" data-tab="gemini">
+              <span class="settings-tab-icon">✦</span><span>Gemini</span>
+            </button>
+            <button type="button" class="settings-tab" data-tab="elorus">
+              <span class="settings-tab-icon">€</span><span>Elorus</span>
+            </button>
+            <button type="button" class="settings-tab" data-tab="account">
+              <span class="settings-tab-icon">⌁</span><span>Πρόσβαση</span>
+            </button>
+            <button type="button" class="settings-tab" data-tab="about">
+              <span class="settings-tab-icon">i</span><span>Σχετικά</span>
+            </button>
+          </nav>
+
+          <div class="settings-panels">
+          <!-- Appearance -->
+          <section class="settings-panel active" id="panel-appearance">
+            <header class="settings-panel-heading">
+              <h3>Εμφάνιση</h3>
+              <p>Προσάρμοσε τον τρόπο που εμφανίζεται και συμπεριφέρεται η Dorothy.</p>
+            </header>
+            <div class="settings-group">
+              <label class="check-row">
+                <span>Εμφάνιση γρήγορων ενεργειών</span>
+                <div class="toggle-wrap">
+                  <input id="quickActionsToggle" type="checkbox" role="switch" checked>
+                </div>
+              </label>
+            </div>
+          </section>
+
+          <section class="settings-panel" id="panel-mac">
+            <header class="settings-panel-heading">
+              <h3>Mac</h3>
+              <p>Έλεγξε τις τοπικές υπηρεσίες, τις εφαρμογές και το power schedule.</p>
+            </header>
+            <div class="settings-group">
+              <div class="settings-row-header">
+                <div>
+                  <div class="settings-label">Κατάσταση εκκίνησης</div>
+                  <div id="systemReadinessSummary" class="settings-detail">Έλεγχος υπηρεσιών…</div>
+                </div>
+                <button id="refreshSystemBtn" type="button" class="secondary-small">Έλεγχος</button>
+              </div>
+              <div id="systemReadiness" class="service-grid" aria-live="polite"></div>
+              <div id="bootAutomationStatus" class="boot-status"></div>
+            </div>
+
+            <div class="settings-group">
+              <div class="settings-row-header">
+                <div>
+                  <div class="settings-label">Power schedule</div>
+                  <div id="macSchedule" class="settings-detail">Φόρτωση…</div>
+                </div>
+                <button id="refreshMacBtn" type="button" class="secondary-small">Ανανέωση</button>
+              </div>
+            </div>
+
+            <div class="settings-group">
+              <label class="settings-label" for="applicationInput">Εφαρμογή</label>
+              <input id="applicationInput" list="runningApplications" placeholder="π.χ. Claude, Safari">
+              <datalist id="runningApplications"></datalist>
+              <div class="mac-action-row">
+                <button type="button" data-app-action="open">Άνοιγμα</button>
+                <button type="button" data-app-action="hide">Απόκρυψη</button>
+                <button type="button" data-app-action="quit" class="danger-soft">Κλείσιμο</button>
+              </div>
+            </div>
+
+            <div class="settings-group">
+              <div class="settings-label">Ενέργεια συστήματος</div>
+              <div class="mac-action-row">
+                <button type="button" data-power-action="sleep">Sleep</button>
+                <button type="button" data-power-action="restart" class="danger-soft">Restart</button>
+                <button type="button" data-power-action="shutdown" class="danger-soft">Shutdown</button>
+              </div>
+              <div id="macActionStatus" class="settings-detail" role="status"></div>
+            </div>
+          </section>
+
+          <!-- Voice -->
+          <section class="settings-panel" id="panel-voice">
+            <header class="settings-panel-heading">
+              <h3>Φωνή</h3>
+              <p>Ρύθμισε την ανάγνωση, τις φωνές και τη φωνητική εισαγωγή.</p>
+            </header>
+            <div class="settings-group">
+              <label class="check-row">
+                <span>Ανάγνωση απαντήσεων</span>
+                <div class="toggle-wrap">
+                  <input id="ttsToggle" type="checkbox" role="switch">
+                </div>
+              </label>
+            </div>
+
+            <div class="settings-group">
+              <label class="settings-label">Μηχανή φωνής</label>
+              <select id="ttsEngineSelect">
+                <option value="edge-tts">Edge TTS – Athina (φυσικό, δωρεάν)</option>
+                <option value="browser">Browser (System voices)</option>
+                <option value="gtts">Server (Google gTTS)</option>
+                <option value="piper">Server (Piper TTS)</option>
+                <option value="google">Google Cloud WaveNet</option>
+              </select>
+            </div>
+
+            <div id="browserTtsSettings" class="settings-group">
+              <label class="settings-label">Ελληνική φωνή</label>
+              <select id="greekVoiceSelect"></select>
+              <label class="settings-label">Αγγλική φωνή</label>
+              <select id="englishVoiceSelect"></select>
+            </div>
+
+            <div class="settings-group">
+              <label class="settings-label">Ταχύτητα</label>
+              <div class="range-wrap">
+                <input id="speechRate" type="range" min="0.5" max="2" step="0.1" value="1">
+                <span id="speechRateLabel">1.0×</span>
+              </div>
+            </div>
+
+            <div class="settings-group">
+              <label class="check-row">
+                <span>Κράτημα για ομιλία</span>
+                <div class="hint">Κράτα πατημένο το μικρόφωνο και άφησέ το για αποστολή</div>
+                <div class="toggle-wrap">
+                  <input id="pushToTalkToggle" type="checkbox" role="switch">
+                </div>
+              </label>
+            </div>
+          </section>
+
+          <!-- Gemini -->
+          <section class="settings-panel" id="panel-gemini">
+            <header class="settings-panel-heading">
+              <h3>Gemini</h3>
+              <p>Διαχειρίσου την ασφαλή σύνδεση με το Google Gemini API.</p>
+            </header>
+            <div class="settings-group integration-intro">
+              <div class="settings-label">Gemini API</div>
+              <p>Επικόλλησε το Google API key σου. Δεν επιστρέφεται ποτέ στο browser μετά την αποθήκευση.</p>
+            </div>
+
+            <div class="settings-group">
+              <label class="settings-label" for="geminiApiKey">GEMINI_API_KEY</label>
+              <input
+                id="geminiApiKey"
+                type="password"
+                placeholder="AIza…"
+                autocomplete="off"
+                autocapitalize="none"
+                spellcheck="false"
+                data-1p-ignore
+              >
+              <div id="geminiApiKeyHint" class="settings-detail">Δεν έχει ελεγχθεί ακόμη.</div>
+              <button id="saveGeminiBtn" type="button" class="primary integration-save">Αποθήκευση και ενεργοποίηση</button>
+              <div id="geminiStatus" class="integration-status" role="status" aria-live="polite"></div>
+            </div>
+          </section>
+
+          <!-- Elorus -->
+          <section class="settings-panel" id="panel-elorus">
+            <header class="settings-panel-heading">
+              <h3>Elorus</h3>
+              <p>Σύνδεσε τα read-only οικονομικά δεδομένα της επιχείρησης.</p>
+            </header>
+            <div class="settings-group integration-intro">
+              <div class="settings-label">Elorus API</div>
+              <p>Τα στοιχεία αποθηκεύονται στο macOS Keychain. Το API key δεν επιστρέφεται ποτέ στο webapp μετά την αποθήκευση.</p>
+            </div>
+
+            <div class="settings-group">
+              <label class="settings-label" for="elorusApiKey">ELORUS_API_KEY</label>
+              <input
+                id="elorusApiKey"
+                type="password"
+                placeholder="Επικόλλησε το API key"
+                autocomplete="off"
+                autocapitalize="none"
+                spellcheck="false"
+                data-1p-ignore
+              >
+              <div id="elorusApiKeyHint" class="settings-detail">Δεν έχει ελεγχθεί ακόμη.</div>
+
+              <label class="settings-label" for="elorusOrganizationId">ELORUS_ORGANIZATION_ID</label>
+              <input
+                id="elorusOrganizationId"
+                type="text"
+                inputmode="numeric"
+                placeholder="Organization ID"
+                autocomplete="off"
+                autocapitalize="none"
+                spellcheck="false"
+              >
+
+              <button id="saveElorusBtn" type="button" class="primary integration-save">Αποθήκευση στο Keychain</button>
+              <div id="elorusStatus" class="integration-status" role="status" aria-live="polite"></div>
+            </div>
+          </section>
+
+          <!-- Account -->
+          <section class="settings-panel" id="panel-account">
+            <header class="settings-panel-heading">
+              <h3>Πρόσβαση</h3>
+              <p>Ενημέρωσε το private token που προστατεύει το web app.</p>
+            </header>
+            <div class="settings-group">
+              <label class="settings-label">Private token</label>
+              <input id="settingsTokenInput" type="password" placeholder="Your Dorothy token">
+            </div>
+          </section>
+
+          <!-- About -->
+          <section class="settings-panel" id="panel-about">
+            <header class="settings-panel-heading">
+              <h3>Σχετικά</h3>
+              <p>Πληροφορίες για την τρέχουσα έκδοση και το ενεργό runtime.</p>
+            </header>
+            <div class="settings-group about-info">
+              <div class="about-row"><span>Έκδοση</span><span>3.3.0</span></div>
+              <div class="about-row"><span>Μηχανή</span><span id="aboutEngine">—</span></div>
+              <div class="about-row"><span>Συνεδρία</span><span id="aboutSession">—</span></div>
+            </div>
+          </section>
+          </div>
+        </div>
+
+        <menu>
+          <button id="cancelSettingsBtn" type="button" class="secondary">Ακύρωση</button>
+          <button id="saveSettingsBtn" value="default" class="primary">Αποθήκευση</button>
+        </menu>
+      </form>
+    </dialog>
+    </main>
+  </div>
+
+  <div id="liveVoice" class="live-voice hidden" aria-hidden="true">
+    <div class="live-voice-card">
+      <div class="live-orb" data-live-orb><span></span></div>
+      <p class="live-status" data-live-status>Ξεκινάει…</p>
+      <p class="live-transcript" data-live-transcript></p>
+      <button type="button" class="live-end" data-live-end>Τέλος</button>
+      <p class="live-hint">Μίλα φυσικά. Μπορείς να τη διακόψεις ενώ μιλάει.</p>
+    </div>
+  </div>
+
+  <script src="/communications-summary.js?v=3.3.2"></script>
+  <script src="/app.js?v=3.3.2"></script>
+  <script src="/features.js?v=3.3.2"></script>
+  <script src="/voice-live.js?v=3.3.2"></script>
+  <script src="/notifications.js?v=3.3.2"></script>
+  <script>
+    window.addEventListener('load', async () => {
+      if (!('serviceWorker' in navigator)) return;
+      try {
+        const registration = await navigator.serviceWorker.register('/sw.js', {
+          updateViaCache: 'none'
+        });
+        await registration.update();
+      } catch (error) {
+        console.warn('Dorothy update worker unavailable:', error);
+      }
+    });
+  </script>
+</body>
+</html>

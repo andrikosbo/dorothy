@@ -1,0 +1,13 @@
+{
+  "name": "dorothy-web",
+  "version": "3.3.2",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "test": "node --test"
+  },
+  "dependencies": {},
+  "engines": {
+    "node": ">=18"
+  }
+}

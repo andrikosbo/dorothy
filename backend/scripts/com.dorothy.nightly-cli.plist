@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.dorothy.nightly-cli</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/Users/you/Projects/Dorothy/Dorothy/scripts/dorothy-nightly-cli.sh</string>
+  </array>
+  <key>StartCalendarInterval</key>
+  <dict>
+    <key>Hour</key>
+    <integer>22</integer>
+    <key>Minute</key>
+    <integer>15</integer>
+  </dict>
+  <key>WorkingDirectory</key>
+  <string>/Users/you/Projects/Dorothy/Dorothy</string>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>HOME</key>
+    <string>/Users/you</string>
+    <key>PATH</key>
+    <string>/Users/you/.local/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+  </dict>
+  <key>ProcessType</key>
+  <string>Background</string>
+  <key>ThrottleInterval</key>
+  <integer>60</integer>
+  <key>StandardOutPath</key>
+  <string>/Users/you/Library/Logs/Dorothy/nightly-launchd.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/you/Library/Logs/Dorothy/nightly-launchd.log</string>
+</dict>
+</plist>

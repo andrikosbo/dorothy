@@ -1,0 +1,98 @@
+name: dorothy-automation
+
+services:
+  mem0-qdrant:
+    image: qdrant/qdrant:v1.18.2
+    container_name: dorothy-mem0-qdrant
+    profiles: ["memory"]
+    restart: unless-stopped
+    volumes:
+      - dorothy_mem0_qdrant:/qdrant/storage
+    healthcheck:
+      test: ["CMD", "bash", "-c", "echo > /dev/tcp/127.0.0.1/6333"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
+    networks:
+      - dorothy_automation
+
+  mem0:
+    build:
+      context: ./automation/mem0-service
+    image: dorothy/mem0-service:2.0.6
+    container_name: dorothy-mem0
+    profiles: ["memory"]
+    restart: unless-stopped
+    depends_on:
+      mem0-qdrant:
+        condition: service_healthy
+    environment:
+      MEM0_API_TOKEN: ${MEM0_API_TOKEN:?Run ./scripts/dorothy-automation.sh init}
+      MEM0_USER_ID: ${MEM0_USER_ID:-user}
+      MEM0_LLM_MODEL: ${MEM0_LLM_MODEL:-llama3.1}
+      MEM0_EMBED_MODEL: ${MEM0_EMBED_MODEL:-nomic-embed-text}
+      MEM0_EMBED_DIMS: ${MEM0_EMBED_DIMS:-768}
+      MEM0_COLLECTION: ${MEM0_COLLECTION:-dorothy_memories}
+      MEM0_QDRANT_HOST: mem0-qdrant
+      MEM0_QDRANT_PORT: "6333"
+      MEM0_OLLAMA_BASE_URL: http://host.docker.internal:11434
+      MEM0_DIR: /data
+      MEM0_TELEMETRY: "false"
+    ports:
+      - "127.0.0.1:${MEM0_PORT:-8765}:8765"
+    volumes:
+      - dorothy_mem0_history:/data
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8765/health', timeout=5)"
+      interval: 15s
+      timeout: 8s
+      retries: 12
+      start_period: 60s
+    networks:
+      - dorothy_automation
+
+  openhands:
+    image: docker.openhands.dev/openhands/openhands:1.8
+    container_name: dorothy-openhands
+    profiles: ["coding"]
+    restart: "no"
+    environment:
+      AGENT_SERVER_IMAGE_REPOSITORY: ghcr.io/openhands/agent-server
+      AGENT_SERVER_IMAGE_TAG: 1.26.0-python
+      LOG_ALL_EVENTS: "true"
+      SANDBOX_VOLUMES: "${OPENHANDS_WORKSPACE:?Run ./scripts/dorothy-automation.sh init}:/workspace:rw"
+    ports:
+      - "127.0.0.1:${OPENHANDS_PORT:-3001}:3000"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - dorothy_openhands_state:/.openhands
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:3000/health', timeout=5)"
+      interval: 15s
+      timeout: 8s
+      retries: 12
+      start_period: 60s
+    networks:
+      - dorothy_automation
+
+networks:
+  dorothy_automation:
+    name: dorothy-automation
+
+volumes:
+  dorothy_mem0_qdrant:
+  dorothy_mem0_history:
+  dorothy_openhands_state:
