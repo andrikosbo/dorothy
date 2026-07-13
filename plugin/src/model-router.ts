@@ -75,7 +75,7 @@ export type RoutingLogContext = {
 };
 
 const MODULE_DIR = path.dirname(fileURLToPath(import.meta.url));
-export const DEFAULT_ROUTING_CONFIG_PATH = path.resolve(MODULE_DIR, "../../../config/model-routing.json");
+export const DEFAULT_ROUTING_CONFIG_PATH = path.resolve(MODULE_DIR, "../../backend/config/model-routing.json");
 
 const ROUTE_ORDER: Array<{
   route: ModelRoute;
