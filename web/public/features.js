@@ -9,11 +9,11 @@
   const voiceModeBtn = document.getElementById("voiceModeBtn");
   const navItems = [...document.querySelectorAll("[data-feature-view]")];
   const viewTitles = {
-    today: "Σήμερα",
-    communications: "Επικοινωνίες",
-    documents: "Έγγραφα",
+    today: "Today",
+    communications: "Communications",
+    documents: "Documents",
     browser: "Browser Action Mode",
-    meetings: "Συναντήσεις",
+    meetings: "Meetings",
     projects: "Projects",
     analytics: "Analytics",
   };
@@ -87,10 +87,10 @@
         ${body}
       </div>
       <form class="workspace-command" data-workspace-command>
-        <button type="button" class="workspace-attach" data-open-documents aria-label="Προσθήκη αρχείου">${icon("file")}</button>
-        <input name="prompt" placeholder="Ρώτησε τη Dorothy…" autocomplete="off">
+        <button type="button" class="workspace-attach" data-open-documents aria-label="Add file">${icon("file")}</button>
+        <input name="prompt" placeholder="Ask Dorothy…" autocomplete="off">
         <button type="button" class="workspace-voice" data-open-voice aria-label="Voice mode">${icon("mic")}</button>
-        <button type="submit" class="workspace-send" aria-label="Αποστολή">↗</button>
+        <button type="submit" class="workspace-send" aria-label="Send">↗</button>
       </form>
     `;
   }
@@ -136,19 +136,19 @@
       if (view === "projects") await renderProjects(Boolean(options.force));
       if (view === "analytics") await renderAnalytics(Boolean(options.force));
     } catch (error) {
-      panel.innerHTML = workspaceShell(view, emptyState("Δεν φορτώθηκε", error.message, "Δοκίμασε ξανά"));
+      panel.innerHTML = workspaceShell(view, emptyState("Didn't load", error.message, "Try again"));
       bindWorkspaceChrome();
     }
   }
 
   function skeleton(view) {
-    return `<div class="feature-skeleton" aria-label="Φόρτωση ${escape(viewTitles[view] || view)}">
+    return `<div class="feature-skeleton" aria-label="Loading ${escape(viewTitles[view] || view)}">
       <i></i><i></i><i></i><i></i><i></i>
     </div>`;
   }
 
   function gaNum(value) {
-    return Number(value || 0).toLocaleString("el-GR");
+    return Number(value || 0).toLocaleString("en-GB");
   }
 
   function gaSparkline(series) {
@@ -178,14 +178,14 @@
     const status = await api("/api/analytics/status");
     if (!status.clientConfigured) {
       panel.innerHTML = workspaceShell("analytics",
-        emptyState("Google Analytics", "Δεν έχει ρυθμιστεί OAuth client.", ""));
+        emptyState("Google Analytics", "No OAuth client has been configured.", ""));
       bindWorkspaceChrome();
       return;
     }
     if (!status.connected) {
       panel.innerHTML = workspaceShell("analytics", `<section class="workspace-section">
-        ${sectionHeading("browser", "Google Analytics", "Μη συνδεδεμένο", "")}
-        ${emptyState("Σύνδεσε το Google Analytics", "Read-only πρόσβαση με τον Google λογαριασμό σου.", "Σύνδεση με Google")}
+        ${sectionHeading("browser", "Google Analytics", "Not connected", "")}
+        ${emptyState("Connect Google Analytics", "Read-only access with your Google account.", "Connect with Google")}
       </section>`);
       bindWorkspaceChrome();
       panel.querySelector(".feature-empty button")?.addEventListener("click", connectAnalytics);
@@ -203,20 +203,20 @@
       .map(property => `<option value="${escape(property.propertyId)}"${property.propertyId === status.propertyId ? " selected" : ""}>${escape(property.displayName)}</option>`)
       .join("");
     const picker = `<section class="workspace-section ga-picker">
-      ${sectionHeading("search", "Property", `${properties.length} διαθέσιμα`, "")}
-      <select data-ga-property class="ga-select" aria-label="Επιλογή GA4 property">${optionsMarkup || "<option>—</option>"}</select>
+      ${sectionHeading("search", "Property", `${properties.length} available`, "")}
+      <select data-ga-property class="ga-select" aria-label="Select GA4 property">${optionsMarkup || "<option>—</option>"}</select>
     </section>`;
     const metrics = overview && overview.ok ? `<section class="workspace-section">
-      ${sectionHeading("browser", overview.propertyName || "Property", `Τελευταίες ${overview.window || "28 ημέρες"}`, '<button class="soft-button" data-refresh-view>Ανανέωση</button>')}
+      ${sectionHeading("browser", overview.propertyName || "Property", `Last ${overview.window || "28 days"}`, '<button class="soft-button" data-refresh-view>Refresh</button>')}
       <div class="ga-metrics">
-        <article class="ga-metric"><span>Χρήστες</span><strong>${gaNum(overview.totals.users)}</strong></article>
+        <article class="ga-metric"><span>Users</span><strong>${gaNum(overview.totals.users)}</strong></article>
         <article class="ga-metric"><span>Sessions</span><strong>${gaNum(overview.totals.sessions)}</strong></article>
-        <article class="ga-metric"><span>Προβολές</span><strong>${gaNum(overview.totals.pageViews)}</strong></article>
+        <article class="ga-metric"><span>Views</span><strong>${gaNum(overview.totals.pageViews)}</strong></article>
         <article class="ga-metric accent"><span>Engagement</span><strong>${overview.totals.engagementRate}%</strong></article>
       </div>
       ${gaSparkline(overview.series)}
     </section>`
-      : `<section class="workspace-section">${emptyState("Διάλεξε property", "Επίλεξε ένα GA4 property για να δεις στοιχεία.", "")}</section>`;
+      : `<section class="workspace-section">${emptyState("Choose a property", "Select a GA4 property to see data.", "")}</section>`;
     panel.innerHTML = workspaceShell("analytics", picker + metrics);
     bindWorkspaceChrome();
     bindAnalytics();
@@ -252,39 +252,39 @@
       <section class="today-intro">
         <div>
           <p class="today-date">${formatLongDate(new Date())}</p>
-          <h2>${greeting()}, χρήστη.</h2>
+          <h2>${greeting()}.</h2>
           <p>${todaySummary(calendar, mail, reminders)}</p>
         </div>
-        <button class="soft-button" data-refresh-view>Ανανέωση</button>
+        <button class="soft-button" data-refresh-view>Refresh</button>
       </section>
       <div class="today-layout">
         <section class="workspace-section agenda-section ${calendar.length ? "" : "empty-agenda"}">
-          ${sectionHeading("calendar", "Πρόγραμμα", `${calendar.length} επόμενα`, '<button data-view-jump="meetings">Προετοιμασία</button>')}
-          <div class="agenda-list">${calendar.length ? calendar.map(eventRow).join("") : emptyInline("Δεν υπάρχει κάτι στο ημερολόγιο.")}</div>
+          ${sectionHeading("calendar", "Schedule", `${calendar.length} upcoming`, '<button data-view-jump="meetings">Prepare</button>')}
+          <div class="agenda-list">${calendar.length ? calendar.map(eventRow).join("") : emptyInline("Nothing on the calendar.")}</div>
         </section>
         <section class="workspace-section communications-section">
-          ${sectionHeading("mail", "Επικοινωνίες προτεραιότητας", `${mail.length} θέματα`, '<button data-view-jump="communications">Προβολή όλων</button>')}
-          <div class="compact-list">${mail.length ? mail.map(mailRow).join("") : emptyInline("Το inbox είναι καθαρό.")}</div>
+          ${sectionHeading("mail", "Priority communications", `${mail.length} threads`, '<button data-view-jump="communications">View all</button>')}
+          <div class="compact-list">${mail.length ? mail.map(mailRow).join("") : emptyInline("Inbox is clear.")}</div>
         </section>
         <section class="workspace-section reminders-section">
-          ${sectionHeading("reminder", "Υπενθυμίσεις", `${reminders.length} ανοιχτές`, "")}
-          <div class="compact-list">${reminders.length ? reminders.map(reminderRow).join("") : emptyInline("Δεν υπάρχουν κοντινές υπενθυμίσεις.")}</div>
+          ${sectionHeading("reminder", "Reminders", `${reminders.length} open`, "")}
+          <div class="compact-list">${reminders.length ? reminders.map(reminderRow).join("") : emptyInline("No upcoming reminders.")}</div>
         </section>
         <section class="workspace-section finance-pulse">
-          ${sectionHeading("money", "Οικονομική εικόνα", String(data.finance?.year || new Date().getFullYear()), '<button data-finance-jump>Αναλυτικά</button>')}
+          ${sectionHeading("money", "Financial snapshot", String(data.finance?.year || new Date().getFullYear()), '<button data-finance-jump>Details</button>')}
           <div class="finance-pulse-grid">
-            ${metric("Έσοδα", finance.revenue)}
-            ${metric("Μικτό κέρδος", finance.grossProfit)}
-            ${metric("Αποτέλεσμα", finance.operatingResult, true)}
+            ${metric("Revenue", finance.revenue)}
+            ${metric("Gross profit", finance.grossProfit)}
+            ${metric("Result", finance.operatingResult, true)}
           </div>
         </section>
         <section class="workspace-section documents-section">
-          ${sectionHeading("file", "Πρόσφατα έγγραφα", `${documents.length} πρόσφατα`, '<button data-view-jump="documents">Προβολή όλων</button>')}
-          <div class="document-rail">${documents.length ? documents.map(documentRow).join("") : emptyInline("Δεν βρέθηκαν πρόσφατα έγγραφα.")}</div>
+          ${sectionHeading("file", "Recent documents", `${documents.length} recent`, '<button data-view-jump="documents">View all</button>')}
+          <div class="document-rail">${documents.length ? documents.map(documentRow).join("") : emptyInline("No recent documents found.")}</div>
         </section>
         <section class="workspace-section browser-pulse">
-          ${sectionHeading("browser", "Browser Action", pending ? "Αναμένει έγκριση" : "Καμία εκκρεμότητα", '<button data-view-jump="browser">Άνοιγμα</button>')}
-          ${pending ? browserPreview(pending, true) : emptyInline("Δημιούργησε μια ασφαλή browser ενέργεια με προεπισκόπηση.")}
+          ${sectionHeading("browser", "Browser Action", pending ? "Awaiting approval" : "Nothing pending", '<button data-view-jump="browser">Open</button>')}
+          ${pending ? browserPreview(pending, true) : emptyInline("Create a safe browser action with a preview.")}
         </section>
       </div>`;
     panel.innerHTML = workspaceShell("today", body);
@@ -300,7 +300,7 @@
     );
     panel.querySelectorAll("[data-event-brief]").forEach(button => button.addEventListener("click", () => {
       const event = decodePayload(button.dataset.eventBrief);
-      runPrompt(`Ετοίμασέ μου σύντομο meeting brief για τη συνάντηση "${event.title}" στις ${event.startsAt}. Έλεγξε calendar, σχετικά emails, notes και αρχεία.`);
+      runPrompt(`Prepare a short meeting brief for the meeting "${event.title}" at ${event.startsAt}. Check the calendar, relevant emails, notes, and files.`);
     }));
     panel.querySelectorAll("[data-mail-review]").forEach(button =>
       button.addEventListener("click", () => showView("communications"))
@@ -313,7 +313,7 @@
         await setMailRead(mail, true);
         cache.today = null;
         await renderToday(true);
-        showUndoToast("Η επικοινωνία έγινε διαβασμένη.", async () => {
+        showUndoToast("Marked as read.", async () => {
           await setMailRead(mail, false);
           cache.today = null;
           await renderToday(true);
@@ -333,20 +333,20 @@
     const body = `
       <div class="workspace-toolbar">
         <div class="segmented" role="tablist">
-          <button class="active" data-mail-filter="priority">Προτεραιότητα</button>
-          <button data-mail-filter="pending">Εκκρεμότητες</button>
-          <button data-mail-filter="reply">Χρειάζονται απάντηση</button>
-          <button data-mail-filter="all">Όλα</button>
+          <button class="active" data-mail-filter="priority">Priority</button>
+          <button data-mail-filter="pending">Pending</button>
+          <button data-mail-filter="reply">Needs reply</button>
+          <button data-mail-filter="all">All</button>
         </div>
-        <button class="soft-button" data-refresh-comms>Ανανέωση inbox</button>
+        <button class="soft-button" data-refresh-comms>Refresh inbox</button>
       </div>
       <div class="communications-workspace">
         <div class="mail-list" data-mail-list>${renderMailList(mails.filter(isImportantMail))}</div>
         <aside class="copilot-panel">
           <span class="section-label">Communication Copilot</span>
-          <h2>Από μήνυμα σε επόμενη ενέργεια</h2>
-          <p>Επίλεξε ένα email και ζήτησε draft, task ή meeting follow-up. Τίποτα δεν αποστέλλεται χωρίς έγκριση.</p>
-          <div class="copilot-empty" data-copilot-detail>Επίλεξε ένα μήνυμα από τη λίστα.</div>
+          <h2>From message to next action</h2>
+          <p>Select an email and ask for a draft, task, or meeting follow-up. Nothing is sent without approval.</p>
+          <div class="copilot-empty" data-copilot-detail>Select a message from the list.</div>
         </aside>
       </div>`;
     panel.innerHTML = workspaceShell("communications", body);
@@ -366,10 +366,10 @@
           : mails.filter(isImportantMail);
       panel.querySelector("[data-mail-list]").innerHTML = renderMailList(filtered, active);
       panel.querySelector("[data-copilot-detail]").textContent = filtered.length
-        ? "Επίλεξε ένα μήνυμα από τη λίστα."
+        ? "Select a message from the list."
         : active === "all"
-          ? "Δεν υπάρχουν πρόσφατα μηνύματα."
-          : "Καμία εκκρεμής επικοινωνία. Τα διαβασμένα εμφανίζονται μόνο στο «Όλα».";
+          ? "No recent messages."
+          : "No pending communications. Read messages only show under “All”.";
       bindMailSelection(filtered, render);
     };
     panel.querySelectorAll("[data-mail-filter]").forEach(button => button.addEventListener("click", () => {
@@ -395,25 +395,25 @@
       panel.querySelector("[data-copilot-detail]").innerHTML = `
         <div class="copilot-message">
           <span>${escape(senderName(mail.sender))}</span>
-          <h3>${escape(mail.subject || "(χωρίς θέμα)")}</h3>
-          <p>${escape(mail.excerpt || "Δεν υπάρχει διαθέσιμο preview.")}</p>
+          <h3>${escape(mail.subject || "(no subject)")}</h3>
+          <p>${escape(mail.excerpt || "No preview available.")}</p>
         </div>
         <div class="copilot-actions">
-          <button data-copilot="draft">Σύνταξη απάντησης</button>
-          <button data-copilot="task">Δημιουργία task</button>
-          <button data-copilot="meeting">Προσθήκη σε meeting</button>
-          ${mail.read ? "" : '<button class="dismiss-action" data-copilot="dismiss">Dismiss · Διαβάστηκε</button>'}
+          <button data-copilot="draft">Draft reply</button>
+          <button data-copilot="task">Create task</button>
+          <button data-copilot="meeting">Add to meeting</button>
+          ${mail.read ? "" : '<button class="dismiss-action" data-copilot="dismiss">Dismiss · Read</button>'}
         </div>
-        <small>${mail.read ? "Το μήνυμα είναι ήδη διαβασμένο." : "Το Dismiss ενημερώνει το Mail και συγχρονίζεται στις Apple συσκευές σου."}</small>`;
+        <small>${mail.read ? "This message is already read." : "Dismiss updates Mail and syncs to your Apple devices."}</small>`;
       panel.querySelectorAll("[data-copilot]").forEach(action => action.addEventListener("click", async () => {
         if (action.dataset.copilot === "dismiss") {
           await dismissMail(mail, rerender, action);
           return;
         }
         const prompts = {
-          draft: `Διάβασε αυτό το email και ετοίμασε μόνο draft απάντησης, χωρίς αποστολή. Από: ${mail.sender}. Θέμα: ${mail.subject}. Περιεχόμενο: ${mail.excerpt}`,
-          task: `Μετέτρεψε αυτό το email σε πλήρες communication task με Apple Note και κατάλληλο Reminder, αλλά δείξε μου πρώτα τι θα δημιουργήσεις. Από: ${mail.sender}. Θέμα: ${mail.subject}. Περιεχόμενο: ${mail.excerpt}`,
-          meeting: `Χρησιμοποίησε αυτό το email ως context για επόμενη συνάντηση και πρότεινε meeting note/follow-up. Από: ${mail.sender}. Θέμα: ${mail.subject}. Περιεχόμενο: ${mail.excerpt}`,
+          draft: `Read this email and prepare only a draft reply, without sending it. From: ${mail.sender}. Subject: ${mail.subject}. Content: ${mail.excerpt}`,
+          task: `Turn this email into a full communication task with an Apple Note and an appropriate Reminder, but show me first what you'll create. From: ${mail.sender}. Subject: ${mail.subject}. Content: ${mail.excerpt}`,
+          meeting: `Use this email as context for an upcoming meeting and suggest a meeting note/follow-up. From: ${mail.sender}. Subject: ${mail.subject}. Content: ${mail.excerpt}`,
         };
         runPrompt(prompts[action.dataset.copilot]);
       }));
@@ -433,7 +433,7 @@
       mail.read = true;
       cache.today = null;
       rerender();
-      showUndoToast("Dismissed και σημειώθηκε ως διαβασμένο.", async () => {
+      showUndoToast("Dismissed and marked as read.", async () => {
         await setMailRead(mail, false);
         mail.read = false;
         cache.today = null;
@@ -463,19 +463,19 @@
       <input id="documentUpload" class="hidden" type="file" accept="image/*,.pdf,.doc,.docx,.rtf,.txt,.md,.csv">
       <section class="document-drop" data-document-drop tabindex="0">
         ${icon("upload")}
-        <h2>Ρίξε ένα έγγραφο εδώ</h2>
-        <p>PDF, εικόνα, Office ή κείμενο. Η Dorothy κάνει local extraction/OCR και βρίσκει ποσά, ημερομηνίες και επόμενες ενέργειες.</p>
-        <button class="primary-action" data-choose-document>Επιλογή αρχείου</button>
-        <small>Μέγιστο 18 MB · αποθήκευση στο Dorothy-inbox</small>
+        <h2>Drop a document here</h2>
+        <p>PDF, image, Office file, or text. Dorothy does local extraction/OCR and finds amounts, dates, and next actions.</p>
+        <button class="primary-action" data-choose-document>Choose file</button>
+        <small>18 MB max · saved to Dorothy-inbox</small>
       </section>
       <div class="document-workspace">
         <section class="workspace-section">
-          ${sectionHeading("file", "Έγγραφα", `${data.documents.length} αποθηκευμένα`, "")}
-          <div class="document-grid">${data.documents.length ? data.documents.map(documentCard).join("") : emptyInline("Δεν έχει αναλυθεί ακόμη κάποιο έγγραφο.")}</div>
+          ${sectionHeading("file", "Documents", `${data.documents.length} stored`, "")}
+          <div class="document-grid">${data.documents.length ? data.documents.map(documentCard).join("") : emptyInline("No document has been analyzed yet.")}</div>
         </section>
         <section class="workspace-section">
-          ${sectionHeading("upload", "Share to Dorothy", `${data.shared.length} εισερχόμενα`, "")}
-          <div class="shared-list">${data.shared.length ? data.shared.map(sharedRow).join("") : emptyInline("Χρησιμοποίησε το Share Sheet της συσκευής σου για URL, κείμενο ή αρχείο.")}</div>
+          ${sectionHeading("upload", "Share to Dorothy", `${data.shared.length} incoming`, "")}
+          <div class="shared-list">${data.shared.length ? data.shared.map(sharedRow).join("") : emptyInline("Use your device's Share Sheet for a URL, text, or file.")}</div>
         </section>
       </div>`;
     panel.innerHTML = workspaceShell("documents", body);
@@ -499,18 +499,18 @@
     input?.addEventListener("change", () => uploadDocument(input.files?.[0]));
     panel.querySelectorAll("[data-document-ask]").forEach(button => button.addEventListener("click", () => {
       const document = decodePayload(button.dataset.documentAsk);
-      runPrompt(`Ανάλυσε το αποθηκευμένο έγγραφο "${document.name}" στο ${document.path}. Δώσε σύνοψη, deadlines, ποσά και προτεινόμενες ενέργειες.`);
+      runPrompt(`Analyze the stored document "${document.name}" at ${document.path}. Give a summary, deadlines, amounts, and suggested actions.`);
     }));
     panel.querySelectorAll("[data-shared-ask]").forEach(button => button.addEventListener("click", () => {
       const item = decodePayload(button.dataset.sharedAsk);
-      runPrompt(`Επεξεργάσου αυτό που μοιράστηκα στη Dorothy. Τίτλος: ${item.title}. URL: ${item.url}. Κείμενο: ${item.text}. Αρχείο: ${item.filePath}`);
+      runPrompt(`Process this item I shared with Dorothy. Title: ${item.title}. URL: ${item.url}. Text: ${item.text}. File: ${item.filePath}`);
     }));
   }
 
   async function uploadDocument(file) {
     if (!file) return;
-    if (file.size > 18 * 1024 * 1024) return showToast("Το αρχείο ξεπερνά τα 18 MB.", true);
-    showToast("Ανάλυση εγγράφου…");
+    if (file.size > 18 * 1024 * 1024) return showToast("The file exceeds 18 MB.", true);
+    showToast("Analyzing document…");
     try {
       const data = await fileToBase64(file);
       const response = await api("/api/documents", {
@@ -519,8 +519,8 @@
       });
       cache.documents = null;
       showToast(response.document?.insights?.characters
-        ? "Το έγγραφο αναλύθηκε."
-        : "Το έγγραφο αποθηκεύτηκε, χωρίς αναγνωρίσιμο κείμενο.");
+        ? "The document was analyzed."
+        : "The document was saved, with no recognizable text.");
       renderDocuments(true);
     } catch (error) {
       showToast(error.message, true);
@@ -534,16 +534,16 @@
       <div class="browser-mode-layout">
         <section class="browser-compose">
           <span class="section-label">Preview first</span>
-          <h2>Τι θέλεις να κάνει στον dedicated browser;</h2>
-          <p>Η Dorothy ξεχωρίζει τις read-only ενέργειες από clicks, forms, downloads και αποστολές. Οι δεύτερες εκτελούνται μόνο μετά από ακριβή έγκριση.</p>
+          <h2>What do you want it to do in the dedicated browser?</h2>
+          <p>Dorothy separates read-only actions from clicks, forms, downloads, and submissions. The latter only run after exact approval.</p>
           <form data-browser-form>
-            <label>URL ή υπάρχον tab<input name="url" type="url" placeholder="https://… (προαιρετικό)"></label>
-            <label>Ενέργεια<textarea name="instruction" rows="5" placeholder="Άνοιξε τη σελίδα, σύγκρινε τις τιμές και πες μου τι άλλαξε."></textarea></label>
-            <button class="primary-action" type="submit">Δημιουργία προεπισκόπησης</button>
+            <label>URL or existing tab<input name="url" type="url" placeholder="https://… (optional)"></label>
+            <label>Action<textarea name="instruction" rows="5" placeholder="Open the page, compare the prices, and tell me what changed."></textarea></label>
+            <button class="primary-action" type="submit">Create preview</button>
           </form>
         </section>
         <section class="browser-action-list">
-          ${actions.length ? actions.map(action => browserPreview(action)).join("") : emptyState("Καμία browser ενέργεια", "Δημιούργησε την πρώτη ασφαλή προεπισκόπηση.", "")}
+          ${actions.length ? actions.map(action => browserPreview(action)).join("") : emptyState("No browser actions", "Create the first safe preview.", "")}
         </section>
       </div>`;
     panel.innerHTML = workspaceShell("browser", body);
@@ -572,11 +572,11 @@
     panel.querySelectorAll("[data-browser-execute]").forEach(button => button.addEventListener("click", async () => {
       const action = decodePayload(button.dataset.browserExecute);
       const confirmed = !action.requiresConfirmation || window.confirm(
-        `Να εκτελεστεί ακριβώς αυτή η browser ενέργεια;\n\n${action.instruction}\n\n${action.summary}`
+        `Run exactly this browser action?\n\n${action.instruction}\n\n${action.summary}`
       );
       if (!confirmed) return;
       button.disabled = true;
-      button.textContent = "Εκτέλεση…";
+      button.textContent = "Running…";
       try {
         await api(`/api/browser-actions/${encodeURIComponent(action.id)}/execute`, {
           method: "POST",
@@ -598,27 +598,27 @@
     const body = `
       <div class="meeting-layout">
         <section class="workspace-section">
-          ${sectionHeading("calendar", "Επόμενες συναντήσεις", `${events.length} γεγονότα`, "")}
-          <div class="meeting-list">${events.length ? events.map(meetingCard).join("") : emptyInline("Δεν βρέθηκαν επόμενες συναντήσεις.")}</div>
+          ${sectionHeading("calendar", "Upcoming meetings", `${events.length} events`, "")}
+          <div class="meeting-list">${events.length ? events.map(meetingCard).join("") : emptyInline("No upcoming meetings found.")}</div>
         </section>
         <section class="workspace-section meeting-notes">
-          <span class="section-label">Μετά τη συνάντηση</span>
-          <h2>Σημειώσεις σε actions</h2>
-          <p>Γράψε πρόχειρες σημειώσεις και η Dorothy θα τις μετατρέψει σε σύνοψη, αποφάσεις, tasks και follow-ups.</p>
-          <textarea data-meeting-notes rows="10" placeholder="Συζητήσαμε… Αποφασίστηκε… Ο Νίκος θα…"></textarea>
-          <button class="primary-action" data-process-meeting>Επεξεργασία σημειώσεων</button>
+          <span class="section-label">After the meeting</span>
+          <h2>Notes into actions</h2>
+          <p>Write rough notes and Dorothy will turn them into a summary, decisions, tasks, and follow-ups.</p>
+          <textarea data-meeting-notes rows="10" placeholder="We discussed… It was decided… Nick will…"></textarea>
+          <button class="primary-action" data-process-meeting>Process notes</button>
         </section>
       </div>`;
     panel.innerHTML = workspaceShell("meetings", body);
     bindWorkspaceChrome();
     panel.querySelectorAll("[data-meeting-brief]").forEach(button => button.addEventListener("click", () => {
       const event = decodePayload(button.dataset.meetingBrief);
-      runPrompt(`Ετοίμασε meeting brief για "${event.title}" (${event.startsAt}). Χρησιμοποίησε ημερολόγιο, σχετικά emails, Apple Notes και αρχεία. Δώσε στόχο, context, ανοιχτά θέματα και προτεινόμενες ερωτήσεις.`);
+      runPrompt(`Prepare a meeting brief for "${event.title}" (${event.startsAt}). Use the calendar, relevant emails, Apple Notes, and files. Give the goal, context, open topics, and suggested questions.`);
     }));
     panel.querySelector("[data-process-meeting]")?.addEventListener("click", () => {
       const notes = panel.querySelector("[data-meeting-notes]").value.trim();
       if (!notes) return;
-      runPrompt(`Μετέτρεψε τις παρακάτω σημειώσεις συνάντησης σε σύντομη σύνοψη, αποφάσεις, υπεύθυνους, deadlines και προτεινόμενα follow-ups. Μην στείλεις τίποτα χωρίς έγκριση.\n\n${notes}`);
+      runPrompt(`Turn the following meeting notes into a short summary, decisions, owners, deadlines, and suggested follow-ups. Don't send anything without approval.\n\n${notes}`);
     });
   }
 
@@ -629,13 +629,13 @@
       <div class="projects-layout">
         <section class="project-list-pane">
           <form class="project-create" data-project-form>
-            <input name="name" placeholder="Νέο project" maxlength="120">
+            <input name="name" placeholder="New project" maxlength="120">
             <button type="submit">＋</button>
           </form>
-          <div class="project-list">${projects.length ? projects.map(projectRow).join("") : emptyInline("Δημιούργησε project για πελάτη ή στόχο.")}</div>
+          <div class="project-list">${projects.length ? projects.map(projectRow).join("") : emptyInline("Create a project for a client or goal.")}</div>
         </section>
         <section class="project-detail-pane" data-project-detail>
-          ${emptyState("Μόνιμο context", "Σύνδεσε chats, σημειώσεις, αποφάσεις και επόμενα βήματα γύρω από έναν στόχο.", "")}
+          ${emptyState("Persistent context", "Connect chats, notes, decisions, and next steps around a goal.", "")}
         </section>
       </div>`;
     panel.innerHTML = workspaceShell("projects", body);
@@ -661,17 +661,17 @@
       detail.innerHTML = `
         <span class="section-label">${escape(project.status)}</span>
         <h2>${escape(project.name)}</h2>
-        <textarea data-project-description rows="3" placeholder="Περιγραφή και στόχος">${escape(project.description)}</textarea>
+        <textarea data-project-description rows="3" placeholder="Description and goal">${escape(project.description)}</textarea>
         <div class="project-actions">
-          <button data-project-chat>Συζήτηση με context</button>
-          <button data-project-done>${project.status === "done" ? "Επανενεργοποίηση" : "Ολοκλήρωση"}</button>
+          <button data-project-chat>Chat with context</button>
+          <button data-project-done>${project.status === "done" ? "Reactivate" : "Complete"}</button>
         </div>
         <form class="project-note-form" data-project-note-form>
-          <textarea name="note" rows="4" placeholder="Νέα απόφαση, σημείωση ή επόμενο βήμα"></textarea>
-          <button class="primary-action" type="submit">Προσθήκη σημείωσης</button>
+          <textarea name="note" rows="4" placeholder="New decision, note, or next step"></textarea>
+          <button class="primary-action" type="submit">Add note</button>
         </form>
         <div class="project-notes">${(project.notes || []).length ? project.notes.map(note => `
-          <article><p>${escape(note.text)}</p><small>${formatDateTime(note.createdAt)}</small></article>`).join("") : emptyInline("Δεν υπάρχουν σημειώσεις.")}</div>`;
+          <article><p>${escape(note.text)}</p><small>${formatDateTime(note.createdAt)}</small></article>`).join("") : emptyInline("No notes yet.")}</div>`;
       detail.querySelector("[data-project-description]").addEventListener("change", async event => {
         await api(`/api/projects/${encodeURIComponent(project.id)}`, {
           method: "POST",
@@ -680,7 +680,7 @@
         cache.projects = null;
       });
       detail.querySelector("[data-project-chat]").addEventListener("click", () =>
-        runPrompt(`Δούλεψε μαζί μου στο project "${project.name}". Περιγραφή: ${project.description}. Σημειώσεις: ${(project.notes || []).map(note => note.text).join(" | ")}`)
+        runPrompt(`Work with me on the project "${project.name}". Description: ${project.description}. Notes: ${(project.notes || []).map(note => note.text).join(" | ")}`)
       );
       detail.querySelector("[data-project-done]").addEventListener("click", async () => {
         await api(`/api/projects/${encodeURIComponent(project.id)}`, {
@@ -714,8 +714,8 @@
     dialog.className = "spotlight-dialog";
     dialog.innerHTML = `
       <div class="spotlight-shell">
-        <label class="spotlight-input">${icon("search")}<input type="search" placeholder="Αναζήτηση σε όλη τη Dorothy…" autocomplete="off"><kbd>esc</kbd></label>
-        <div class="spotlight-results"><div class="spotlight-hint">Chats, emails, Apple Notes, αρχεία, projects και έγγραφα.</div></div>
+        <label class="spotlight-input">${icon("search")}<input type="search" placeholder="Search all of Dorothy…" autocomplete="off"><kbd>esc</kbd></label>
+        <div class="spotlight-results"><div class="spotlight-hint">Chats, emails, Apple Notes, files, projects, and documents.</div></div>
       </div>`;
     document.body.appendChild(dialog);
     dialog.addEventListener("click", event => { if (event.target === dialog) dialog.close(); });
@@ -733,17 +733,17 @@
     const input = dialog.querySelector("input");
     input.value = "";
     dialog.querySelector(".spotlight-results").innerHTML =
-      '<div class="spotlight-hint">Chats, emails, Apple Notes, αρχεία, projects και έγγραφα.</div>';
+      '<div class="spotlight-hint">Chats, emails, Apple Notes, files, projects, and documents.</div>';
     setTimeout(() => input.focus(), 0);
   }
 
   async function runSearch(query) {
     const results = ensureSpotlight().querySelector(".spotlight-results");
     if (!query.trim()) {
-      results.innerHTML = '<div class="spotlight-hint">Γράψε αυτό που θυμάσαι. Δεν χρειάζεται να ξέρεις πού βρίσκεται.</div>';
+      results.innerHTML = '<div class="spotlight-hint">Type what you remember. You don\'t need to know where it is.</div>';
       return;
     }
-    results.innerHTML = '<div class="spotlight-hint">Αναζήτηση…</div>';
+    results.innerHTML = '<div class="spotlight-hint">Searching…</div>';
     try {
       const data = await api(`/api/search?q=${encodeURIComponent(query)}`);
       const paint = items => {
@@ -754,7 +754,7 @@
             <span><strong>${escape(item.title)}</strong><small>${escape(item.subtitle || item.excerpt || item.type)}</small></span>
             <em>${escape(item.type)}</em>
           </button>`).join("")
-          : '<div class="spotlight-hint">Δεν βρέθηκε κάτι σχετικό.</div>';
+          : '<div class="spotlight-hint">Nothing relevant found.</div>';
         results.querySelectorAll("[data-search-index]").forEach(button => button.addEventListener("click", () => {
           const item = items[Number(button.dataset.searchIndex)];
           ensureSpotlight().close();
@@ -781,7 +781,7 @@
     if (item.type === "project") return showView("projects");
     if (item.type === "mail") return showView("communications");
     if (item.type === "document" || item.type === "shared") return showView("documents");
-    runPrompt(`Βρήκα αυτό μέσω Dorothy Spotlight και θέλω να το ανοίξουμε/αναλύσουμε: ${item.title}. ${item.subtitle || ""} ${item.excerpt || ""}`);
+    runPrompt(`I found this via Dorothy Spotlight and want to open/analyze it: ${item.title}. ${item.subtitle || ""} ${item.excerpt || ""}`);
   }
 
   function ensureVoiceDialog() {
@@ -792,14 +792,14 @@
     dialog.className = "voice-dialog";
     dialog.innerHTML = `
       <div class="voice-shell">
-        <button class="voice-close" type="button" aria-label="Κλείσιμο">×</button>
+        <button class="voice-close" type="button" aria-label="Close">×</button>
         <div class="voice-orb"><i></i><i></i><i></i></div>
-        <span class="voice-state">Έτοιμη να ακούσω</span>
-        <p class="voice-transcript">Πάτησε το μικρόφωνο και μίλησε φυσικά.</p>
-        <button class="voice-main" type="button" aria-label="Έναρξη φωνητικής συνομιλίας">${icon("mic")}</button>
+        <span class="voice-state">Ready to listen</span>
+        <p class="voice-transcript">Press the microphone and speak naturally.</p>
+        <button class="voice-main" type="button" aria-label="Start voice conversation">${icon("mic")}</button>
         <div class="voice-actions">
-          <button data-voice-clear>Καθαρισμός</button>
-          <button data-voice-send disabled>Αποστολή</button>
+          <button data-voice-clear>Clear</button>
+          <button data-voice-send disabled>Send</button>
         </div>
       </div>`;
     document.body.appendChild(dialog);
@@ -809,7 +809,7 @@
       else startVoice(dialog);
     });
     dialog.querySelector("[data-voice-clear]").addEventListener("click", () => {
-      dialog.querySelector(".voice-transcript").textContent = "Πάτησε το μικρόφωνο και μίλησε φυσικά.";
+      dialog.querySelector(".voice-transcript").textContent = "Press the microphone and speak naturally.";
       dialog.querySelector("[data-voice-send]").disabled = true;
     });
     dialog.querySelector("[data-voice-send]").addEventListener("click", () => stopVoice(dialog, true));
@@ -824,7 +824,7 @@
   function startVoice(dialog) {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
-      dialog.querySelector(".voice-state").textContent = "Δεν υποστηρίζεται από αυτόν τον browser";
+      dialog.querySelector(".voice-state").textContent = "Not supported by this browser";
       return;
     }
     window.DorothyApp?.audioStop();
@@ -835,7 +835,7 @@
     recognition.interimResults = true;
     let finalText = "";
     dialog.classList.add("listening");
-    dialog.querySelector(".voice-state").textContent = "Ακούω… μίλα φυσικά";
+    dialog.querySelector(".voice-state").textContent = "Listening… speak naturally";
     recognition.onresult = event => {
       let interim = "";
       for (let index = event.resultIndex; index < event.results.length; index += 1) {
@@ -844,7 +844,7 @@
         else interim += text;
       }
       const transcript = `${finalText}${interim}`.trim();
-      dialog.querySelector(".voice-transcript").textContent = transcript || "Ακούω…";
+      dialog.querySelector(".voice-transcript").textContent = transcript || "Listening…";
       dialog.querySelector("[data-voice-send]").disabled = !transcript;
     };
     recognition.onerror = () => stopVoiceRecognition(dialog);
@@ -862,14 +862,14 @@
       try { recognition.stop(); } catch {}
     }
     dialog.classList.remove("listening");
-    dialog.querySelector(".voice-state").textContent = "Έτοιμο για αποστολή";
+    dialog.querySelector(".voice-state").textContent = "Ready to send";
   }
 
   function stopVoice(dialog, send) {
     stopVoiceRecognition(dialog);
     const text = dialog.querySelector(".voice-transcript").textContent.trim();
     dialog.close();
-    if (send && text && !text.startsWith("Πάτησε")) runPrompt(text);
+    if (send && text && !text.startsWith("Press the microphone")) runPrompt(text);
   }
 
   function bindWorkspaceChrome() {
@@ -897,7 +897,7 @@
 
   function eventRow(event) {
     return `<article class="agenda-row">
-      <time>${event.allDay ? "Όλη μέρα" : formatTime(event.startsAt)}</time>
+      <time>${event.allDay ? "All day" : formatTime(event.startsAt)}</time>
       <i></i>
       <div><strong>${escape(event.title)}</strong><small>${escape(event.location || event.calendar)}</small></div>
       <button data-event-brief="${encodePayload(event)}">Brief</button>
@@ -907,7 +907,7 @@
   function mailRow(mail) {
     return `<article class="compact-row">
       <span class="avatar">${escape(initials(senderName(mail.sender)))}</span>
-      <div><strong>${escape(senderName(mail.sender))}</strong><small>${escape(mail.subject || "(χωρίς θέμα)")}</small></div>
+      <div><strong>${escape(senderName(mail.sender))}</strong><small>${escape(mail.subject || "(no subject)")}</small></div>
       <span class="compact-actions">
         <button data-mail-review>Review</button>
         <button class="dismiss-action" data-mail-dismiss="${escape(encodePayload({
@@ -937,28 +937,28 @@
     return `<article class="document-card">
       <div class="document-card-icon">${icon("file")}</div>
       <div><strong>${escape(document.name)}</strong><small>${formatBytes(document.size)} · ${escape(formatDateTime(document.createdAt))}</small></div>
-      <p>${escape(document.insights?.excerpt || "Δεν βρέθηκε αναγνωρίσιμο κείμενο.")}</p>
+      <p>${escape(document.insights?.excerpt || "No recognizable text found.")}</p>
       <div class="insight-tags">${(document.insights?.amounts || []).slice(0, 3).map(value => `<span>${escape(value)}</span>`).join("")}${(document.insights?.dates || []).slice(0, 3).map(value => `<span>${escape(value)}</span>`).join("")}</div>
-      <button data-document-ask="${encodePayload(document)}">Ανάλυση με Dorothy</button>
+      <button data-document-ask="${encodePayload(document)}">Analyze with Dorothy</button>
     </article>`;
   }
 
   function sharedRow(item) {
     return `<article class="shared-row">
       <div><strong>${escape(item.title || item.url || item.fileName || "Shared item")}</strong><small>${escape(item.url || item.fileName || formatDateTime(item.createdAt))}</small></div>
-      <button data-shared-ask="${encodePayload(item)}">Άνοιγμα</button>
+      <button data-shared-ask="${encodePayload(item)}">Open</button>
     </article>`;
   }
 
   function browserPreview(action, compact) {
-    const label = action.risk === "confirmation" ? "Χρειάζεται έγκριση" : "Read-only";
+    const label = action.risk === "confirmation" ? "Needs approval" : "Read-only";
     return `<article class="browser-preview ${compact ? "compact" : ""}" data-risk="${escape(action.risk)}">
       <header><span>${escape(label)}</span><small>${escape(action.status)}</small></header>
       <strong>${escape(action.instruction)}</strong>
       ${action.url ? `<a href="${escape(action.url)}" target="_blank" rel="noreferrer">${escape(action.url)}</a>` : ""}
       <p>${escape(action.summary)}</p>
       ${action.result ? `<div class="browser-result">${escape(action.result)}</div>` : ""}
-      ${action.status === "preview" ? `<button data-browser-execute="${encodePayload(action)}">${action.requiresConfirmation ? "Έγκριση και εκτέλεση" : "Εκτέλεση"}</button>` : ""}
+      ${action.status === "preview" ? `<button data-browser-execute="${encodePayload(action)}">${action.requiresConfirmation ? "Approve and run" : "Run"}</button>` : ""}
     </article>`;
   }
 
@@ -966,14 +966,14 @@
     return `<article class="meeting-card">
       <time><strong>${formatTime(event.startsAt)}</strong><small>${formatShortDate(event.startsAt)}</small></time>
       <div><h3>${escape(event.title)}</h3><p>${escape(event.location || event.calendar)}${event.notes ? ` · ${escape(event.notes)}` : ""}</p></div>
-      <button data-meeting-brief="${encodePayload(event)}">Προετοιμασία brief</button>
+      <button data-meeting-brief="${encodePayload(event)}">Prepare brief</button>
     </article>`;
   }
 
   function projectRow(project) {
     return `<button class="project-row" data-project-id="${escape(project.id)}">
       <span>${escape(project.name.slice(0, 1).toUpperCase())}</span>
-      <div><strong>${escape(project.name)}</strong><small>${escape(project.description || `${(project.notes || []).length} σημειώσεις`)}</small></div>
+      <div><strong>${escape(project.name)}</strong><small>${escape(project.description || `${(project.notes || []).length} notes`)}</small></div>
       <em>${escape(project.status)}</em>
     </button>`;
   }
@@ -981,18 +981,18 @@
   function renderMailList(mails, active = "priority") {
     if (!mails.length) {
       return emptyInline(active === "all"
-        ? "Δεν υπάρχουν πρόσφατα μηνύματα."
-        : "Καμία εκκρεμής επικοινωνία. Τα διαβασμένα θεωρούνται διεκπεραιωμένα.");
+        ? "No recent messages."
+        : "No pending communications. Read messages are considered handled.");
     }
     return mails.slice(0, 30).map((mail, index) => `
       <article class="mail-item ${mail.read ? "read" : "unread"}">
         <button class="mail-item-main" data-mail-index="${index}">
           <span class="avatar">${escape(initials(senderName(mail.sender)))}</span>
-          <span><strong>${escape(senderName(mail.sender))}</strong><b>${escape(mail.subject || "(χωρίς θέμα)")}</b><small>${escape(mail.excerpt || "")}</small>${mail.intelligence ? `<small>${escape(intelligenceLabel(mail.intelligence))}</small>` : ""}</span>
+          <span><strong>${escape(senderName(mail.sender))}</strong><b>${escape(mail.subject || "(no subject)")}</b><small>${escape(mail.excerpt || "")}</small>${mail.intelligence ? `<small>${escape(intelligenceLabel(mail.intelligence))}</small>` : ""}</span>
           <time>${formatMailTime(mail.receivedAt)}</time>
         </button>
         ${mail.read
-          ? '<span class="mail-read-state">Διαβασμένο</span>'
+          ? '<span class="mail-read-state">Read</span>'
           : `<button class="mail-dismiss dismiss-action" data-mail-quick-dismiss="${index}">Dismiss</button>`}
       </article>`).join("");
   }
@@ -1015,20 +1015,20 @@
 
   function intelligenceLabel(intelligence) {
     const category = {
-      work: "Δουλειά",
-      personal: "Προσωπικό",
+      work: "Work",
+      personal: "Personal",
       otp: "OTP",
-      security: "Ασφάλεια",
-      transaction: "Συναλλαγή",
-      notification: "Ενημέρωση",
+      security: "Security",
+      transaction: "Transaction",
+      notification: "Notification",
       marketing: "Marketing",
-      noise: "Θόρυβος",
-      unknown: "Άγνωστο",
+      noise: "Noise",
+      unknown: "Unknown",
     }[intelligence.category] || intelligence.category;
     const action = {
-      reply: "χρειάζεται απάντηση",
-      task: "πιθανή ενέργεια",
-      review: "θέλει έλεγχο",
+      reply: "needs reply",
+      task: "possible action",
+      review: "needs review",
       none: "",
     }[intelligence.action] || "";
     return [category, action].filter(Boolean).join(" · ");
@@ -1036,19 +1036,19 @@
 
   function todaySummary(calendar, mail, reminders) {
     const parts = [];
-    if (calendar.length) parts.push(`${calendar.length} γεγονότα`);
-    if (mail.length) parts.push(`${mail.length} σημαντικές επικοινωνίες`);
-    if (reminders.length) parts.push(`${reminders.length} υπενθυμίσεις`);
-    return parts.length ? `${parts.join(" · ")}. Όλα σε μία καθαρή εικόνα.` : "Η ημέρα είναι καθαρή.";
+    if (calendar.length) parts.push(`${calendar.length} events`);
+    if (mail.length) parts.push(`${mail.length} important communications`);
+    if (reminders.length) parts.push(`${reminders.length} reminders`);
+    return parts.length ? `${parts.join(" · ")}. Everything in one clear view.` : "The day is clear.";
   }
 
   function greeting() {
     const hour = new Date().getHours();
-    return hour < 12 ? "Καλημέρα" : hour < 18 ? "Καλησπέρα" : "Καλησπέρα";
+    return hour < 12 ? "Good morning" : hour < 18 ? "Good evening" : "Good evening";
   }
 
   function senderName(value) {
-    return String(value || "Άγνωστος").replace(/\s*<.*?>\s*/, "").trim() || "Άγνωστος";
+    return String(value || "Unknown").replace(/\s*<.*?>\s*/, "").trim() || "Unknown";
   }
 
   function initials(value) {
@@ -1057,34 +1057,34 @@
 
   function formatTime(value) {
     if (!value) return "—";
-    return new Date(value).toLocaleTimeString("el-GR", { hour: "2-digit", minute: "2-digit" });
+    return new Date(value).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
   }
 
   function formatShortDate(value) {
     if (!value) return "";
-    return new Date(value).toLocaleDateString("el-GR", { day: "numeric", month: "short" });
+    return new Date(value).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
   }
 
   function formatLongDate(value) {
-    return value.toLocaleDateString("el-GR", { weekday: "long", day: "numeric", month: "long" });
+    return value.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" });
   }
 
   function formatDateTime(value) {
-    if (!value) return "Χωρίς ημερομηνία";
+    if (!value) return "No date";
     const date = new Date(value);
     if (Number.isNaN(date.getTime())) return String(value);
-    return date.toLocaleString("el-GR", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+    return date.toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
   }
 
   function formatMailTime(value) {
     if (!value) return "";
     const date = new Date(value);
-    return date.toLocaleString("el-GR", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+    return date.toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
   }
 
   function formatMoney(value) {
     const amount = Number(value || 0);
-    return new Intl.NumberFormat("el-GR", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(amount);
+    return new Intl.NumberFormat("en-GB", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(amount);
   }
 
   function formatBytes(value) {
@@ -1134,7 +1134,7 @@
     text.textContent = message;
     const button = document.createElement("button");
     button.type = "button";
-    button.textContent = "Αναίρεση";
+    button.textContent = "Undo";
     toast.append(text, button);
     document.body.appendChild(toast);
     requestAnimationFrame(() => toast.classList.add("visible"));

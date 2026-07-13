@@ -220,63 +220,63 @@ function classifyCommunication(item, options = {}) {
 
   let category = "unknown";
   let action = "none";
-  let reason = "Δεν βρέθηκε σαφές σήμα.";
+  let reason = "No clear signal found.";
   let score = unread ? 30 : 20;
   let expiresAt = null;
 
   if (otp) {
     category = "otp";
-    reason = "Προσωρινός κωδικός επιβεβαίωσης.";
+    reason = "Temporary verification code.";
     score = 20;
     expiresAt = new Date(receivedAt.getTime() + 20 * 60 * 1000).toISOString();
   } else if (noise) {
     category = "noise";
-    reason = "Αυτοματοποιημένος θόρυβος χωρίς χρήσιμη ενέργεια.";
+    reason = "Automated noise with no useful action.";
     score = 2;
   } else if (marketing) {
     category = "marketing";
-    reason = "Προωθητικό ή newsletter.";
+    reason = "Promotional or newsletter.";
     score = 5;
   } else if (security) {
     category = "security";
     action = unread || flagged ? "review" : "none";
     reason = action === "review"
-      ? "Νέα ειδοποίηση ασφάλειας που χρειάζεται έλεγχο."
-      : "Διαβασμένη ειδοποίηση ασφάλειας.";
+      ? "New security notice that needs review."
+      : "Read security notice.";
     score = action === "review" ? 92 : 45;
   } else if (transaction && deadline) {
     category = work ? "work" : "transaction";
     action = "task";
-    reason = "Οικονομική ή συνδρομητική προθεσμία.";
+    reason = "Financial or subscription deadline.";
     score = 88;
   } else if (transaction) {
     category = "transaction";
     action = unread ? "review" : "none";
-    reason = "Συναλλαγή, παραγγελία ή οικονομική ενημέρωση.";
+    reason = "Transaction, order, or financial update.";
     score = unread ? 58 : 35;
   } else if (work && request) {
     category = "work";
     action = asksForReply(text) ? "reply" : "task";
-    reason = "Επαγγελματικό αίτημα με πιθανή επόμενη ενέργεια.";
+    reason = "Business request with a likely next action.";
     score = 82;
   } else if (work) {
     category = "work";
     action = unread && !automated ? "review" : "none";
-    reason = "Επαγγελματικό πλαίσιο χωρίς σαφές αίτημα.";
+    reason = "Business context with no clear request.";
     score = unread ? 62 : 38;
   } else if (request) {
     category = "personal";
     action = asksForReply(text) ? "reply" : "task";
-    reason = "Προσωπικό μήνυμα με πιθανό αίτημα.";
+    reason = "Personal message with a likely request.";
     score = 72;
   } else if (automated) {
     category = "notification";
-    reason = "Αυτοματοποιημένη ενημέρωση.";
+    reason = "Automated notification.";
     score = 18;
   } else if (unread) {
     category = "unknown";
     action = "review";
-    reason = "Μη αναγνωσμένο ανθρώπινο μήνυμα για γρήγορο έλεγχο.";
+    reason = "Unread human message for a quick check.";
     score = 48;
   }
 

@@ -177,7 +177,7 @@ function normalizeTransaction(transaction) {
     transaction?.referenceNumber,
     transaction?.entry_reference,
     transaction?.entryReference,
-    "Συναλλαγή",
+    "Transaction",
   ]);
   const counterparty = firstText([amount < 0 ? creditor : debtor, creditor, debtor]);
 
@@ -244,7 +244,7 @@ function getOpenBankingOverview(options = {}) {
     const preferred = preferredBalance(balances, account.currency);
     return {
       bankName: account.bankName,
-      displayName: account.displayName || "Λογαριασμός",
+      displayName: account.displayName || "Account",
       maskedIdentifier: account.maskedIdentifier,
       currency: preferred?.currency || account.currency,
       balance: preferred ? roundMoney(preferred.amount) : null,

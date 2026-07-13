@@ -127,18 +127,18 @@ const FALLBACK_CHAT_MODES = [
     id: "dorothy",
     label: "Dorothy",
     badge: "Dorothy mode",
-    description: "Η προσωπική σου βοηθός για οργάνωση, επικοινωνίες και ενέργειες.",
-    title: "Νέα συζήτηση",
-    placeholder: "Μίλα ή γράψε στη Dorothy…",
+    description: "Your personal assistant for organization, communications, and actions.",
+    title: "New conversation",
+    placeholder: "Talk or type to Dorothy…",
     modelSelection: false,
   },
   {
     id: "ai",
     label: "AI",
     badge: "AI mode",
-    description: "Καθημερινό προσωπικό AI chat με Gemini ή τοπικό μοντέλο.",
-    title: "Νέο AI chat",
-    placeholder: "Ρώτησε το προσωπικό σου AI…",
+    description: "Everyday personal AI chat with Gemini or a local model.",
+    title: "New AI chat",
+    placeholder: "Ask your personal AI…",
     modelSelection: true,
   },
 ];
@@ -159,7 +159,7 @@ const state = {
   systemReady:  null,
   systemStatus: null,
   sessions:     [],
-  sessionTitle: "Νέα συζήτηση",
+  sessionTitle: "New conversation",
   mode:          modeFromSessionKey(localStorage.getItem("dorothy_session")),
   model:         "",
   chatModes:     FALLBACK_CHAT_MODES,
@@ -581,23 +581,23 @@ function init() {
 
 async function loadElorusSettings() {
   els.elorusStatus.className = "integration-status";
-  els.elorusStatus.textContent = "Έλεγχος ασφαλούς αποθήκευσης…";
+  els.elorusStatus.textContent = "Checking secure storage…";
   try {
     const res = await apiFetch("/api/integrations/elorus");
     const data = await res.json();
-    if (!res.ok) throw new Error(data.error || "Δεν φορτώθηκαν οι ρυθμίσεις Elorus.");
+    if (!res.ok) throw new Error(data.error || "Failed to load Elorus settings.");
     state.elorusLoaded = true;
     els.elorusApiKey.value = "";
     els.elorusApiKey.placeholder = data.apiKeyConfigured
-      ? "Αποθηκευμένο — άφησέ το κενό για να διατηρηθεί"
-      : "Επικόλλησε το API key";
+      ? "Saved — leave blank to keep it"
+      : "Paste the API key";
     els.elorusApiKeyHint.textContent = data.apiKeyConfigured
-      ? "Το ELORUS_API_KEY είναι αποθηκευμένο στο macOS Keychain."
-      : "Δεν υπάρχει αποθηκευμένο ELORUS_API_KEY.";
+      ? "ELORUS_API_KEY is stored in the macOS Keychain."
+      : "No ELORUS_API_KEY stored.";
     els.elorusOrganizationId.value = data.organizationId || "";
     els.elorusStatus.textContent = data.apiKeyConfigured && data.organizationId
-      ? "Η σύνδεση έχει ρυθμιστεί."
-      : "Συμπλήρωσε και αποθήκευσε τα δύο πεδία.";
+      ? "The connection is configured."
+      : "Fill in and save both fields.";
   } catch (error) {
     els.elorusStatus.className = "integration-status error";
     els.elorusStatus.textContent = error.message;
@@ -608,7 +608,7 @@ async function saveElorusSettings() {
   const apiKey = els.elorusApiKey.value.trim();
   const organizationId = els.elorusOrganizationId.value.trim();
   els.saveElorusBtn.disabled = true;
-  els.saveElorusBtn.textContent = "Αποθήκευση…";
+  els.saveElorusBtn.textContent = "Saving…";
   els.elorusStatus.className = "integration-status";
   els.elorusStatus.textContent = "";
 
@@ -618,40 +618,40 @@ async function saveElorusSettings() {
       body: JSON.stringify({ apiKey, organizationId }),
     });
     const data = await res.json();
-    if (!res.ok) throw new Error(data.error || "Η αποθήκευση απέτυχε.");
+    if (!res.ok) throw new Error(data.error || "Saving failed.");
     els.elorusApiKey.value = "";
     els.elorusOrganizationId.value = data.organizationId || organizationId;
-    els.elorusApiKey.placeholder = "Αποθηκευμένο — άφησέ το κενό για να διατηρηθεί";
-    els.elorusApiKeyHint.textContent = "Το ELORUS_API_KEY είναι αποθηκευμένο στο macOS Keychain.";
+    els.elorusApiKey.placeholder = "Saved — leave blank to keep it";
+    els.elorusApiKeyHint.textContent = "ELORUS_API_KEY is stored in the macOS Keychain.";
     els.elorusStatus.className = "integration-status success";
-    els.elorusStatus.textContent = "Τα στοιχεία Elorus αποθηκεύτηκαν με ασφάλεια.";
+    els.elorusStatus.textContent = "Elorus credentials saved securely.";
   } catch (error) {
     els.elorusStatus.className = "integration-status error";
     els.elorusStatus.textContent = error.message;
   } finally {
     els.saveElorusBtn.disabled = false;
-    els.saveElorusBtn.textContent = "Αποθήκευση στο Keychain";
+    els.saveElorusBtn.textContent = "Save to Keychain";
   }
 }
 
 async function loadGeminiSettings() {
   els.geminiStatus.className = "integration-status";
-  els.geminiStatus.textContent = "Έλεγχος Gemini…";
+  els.geminiStatus.textContent = "Checking Gemini…";
   try {
     const res = await apiFetch("/api/integrations/gemini");
     const data = await res.json();
-    if (!res.ok) throw new Error(data.error || "Δεν φορτώθηκαν οι ρυθμίσεις Gemini.");
+    if (!res.ok) throw new Error(data.error || "Failed to load Gemini settings.");
     state.geminiLoaded = true;
     els.geminiApiKey.value = "";
     els.geminiApiKey.placeholder = data.apiKeyConfigured
-      ? "Αποθηκευμένο — άφησέ το κενό για να διατηρηθεί"
+      ? "Saved — leave blank to keep it"
       : "AIza…";
     els.geminiApiKeyHint.textContent = data.apiKeyConfigured
-      ? "Το API key είναι ρυθμισμένο στο Keychain και στο OpenClaw."
-      : "Επικόλλησε ένα Gemini API key που ξεκινά με AIza.";
+      ? "The API key is configured in the Keychain and OpenClaw."
+      : "Paste a Gemini API key starting with AIza.";
     els.geminiStatus.textContent = data.apiKeyConfigured
-      ? "Το Gemini 2.5 Flash είναι διαθέσιμο στα νέα AI chats."
-      : "Δεν υπάρχει αποθηκευμένο Gemini API key.";
+      ? "Gemini 2.5 Flash is available in new AI chats."
+      : "No Gemini API key stored.";
   } catch (error) {
     els.geminiStatus.className = "integration-status error";
     els.geminiStatus.textContent = error.message;
@@ -661,7 +661,7 @@ async function loadGeminiSettings() {
 async function saveGeminiSettings() {
   const apiKey = els.geminiApiKey.value.trim();
   els.saveGeminiBtn.disabled = true;
-  els.saveGeminiBtn.textContent = "Ενεργοποίηση…";
+  els.saveGeminiBtn.textContent = "Activating…";
   els.geminiStatus.className = "integration-status";
   els.geminiStatus.textContent = "";
 
@@ -671,24 +671,24 @@ async function saveGeminiSettings() {
       body: JSON.stringify({ apiKey }),
     });
     const data = await res.json();
-    if (!res.ok) throw new Error(data.error || "Η ενεργοποίηση απέτυχε.");
+    if (!res.ok) throw new Error(data.error || "Activation failed.");
     els.geminiApiKey.value = "";
-    els.geminiApiKey.placeholder = "Αποθηκευμένο — άφησέ το κενό για να διατηρηθεί";
-    els.geminiApiKeyHint.textContent = "Το API key είναι ρυθμισμένο στο Keychain και στο OpenClaw.";
+    els.geminiApiKey.placeholder = "Saved — leave blank to keep it";
+    els.geminiApiKeyHint.textContent = "The API key is configured in the Keychain and OpenClaw.";
     els.geminiStatus.className = "integration-status success";
-    els.geminiStatus.textContent = "Το Gemini ενεργοποιήθηκε. Άνοιξε νέο AI chat.";
+    els.geminiStatus.textContent = "Gemini is activated. Open a new AI chat.";
     await loadChatModes();
   } catch (error) {
     els.geminiStatus.className = "integration-status error";
     els.geminiStatus.textContent = error.message;
   } finally {
     els.saveGeminiBtn.disabled = false;
-    els.saveGeminiBtn.textContent = "Αποθήκευση και ενεργοποίηση";
+    els.saveGeminiBtn.textContent = "Save and activate";
   }
 }
 
 async function loadMacStatus() {
-  els.macSchedule.textContent = "Φόρτωση…";
+  els.macSchedule.textContent = "Loading…";
   els.macActionStatus.textContent = "";
   try {
     const [macResponse] = await Promise.all([
@@ -697,7 +697,7 @@ async function loadMacStatus() {
     ]);
     const data = await macResponse.json();
     if (!macResponse.ok) throw new Error(data.error || "Status unavailable");
-    els.macSchedule.textContent = data.scheduleSummary || data.schedule || "Δεν υπάρχει προγραμματισμένο wake.";
+    els.macSchedule.textContent = data.scheduleSummary || data.schedule || "No scheduled wake.";
     els.runningApplications.innerHTML = "";
     for (const application of data.applications || []) {
       const option = document.createElement("option");
@@ -705,30 +705,30 @@ async function loadMacStatus() {
       els.runningApplications.appendChild(option);
     }
   } catch (error) {
-    els.macSchedule.textContent = `Δεν φορτώθηκε: ${error.message}`;
+    els.macSchedule.textContent = `Didn't load: ${error.message}`;
   }
 }
 
 async function controlMacApplication(action) {
   const application = els.applicationInput.value.trim();
   if (!application) {
-    els.macActionStatus.textContent = "Γράψε πρώτα το όνομα εφαρμογής.";
+    els.macActionStatus.textContent = "Enter an application name first.";
     els.applicationInput.focus();
     return;
   }
   const confirmed = action !== "quit"
-    || window.confirm(`Να κλείσει η εφαρμογή “${application}”; Μπορεί να έχει μη αποθηκευμένη εργασία.`);
+    || window.confirm(`Quit the application "${application}"? It may have unsaved work.`);
   if (!confirmed) return;
 
-  els.macActionStatus.textContent = "Εκτέλεση…";
+  els.macActionStatus.textContent = "Running…";
   try {
     const res = await apiFetch("/api/mac/application", {
       method: "POST",
       body: JSON.stringify({ application, action, confirmed }),
     });
     const data = await res.json();
-    if (!res.ok) throw new Error(data.error || "Η ενέργεια απέτυχε.");
-    els.macActionStatus.textContent = `${application}: ${action} ολοκληρώθηκε.`;
+    if (!res.ok) throw new Error(data.error || "The action failed.");
+    els.macActionStatus.textContent = `${application}: ${action} complete.`;
     await loadMacStatus();
   } catch (error) {
     els.macActionStatus.textContent = error.message;
@@ -738,18 +738,18 @@ async function controlMacApplication(action) {
 async function controlMacPower(action) {
   const labels = { sleep: "sleep", restart: "restart", shutdown: "shutdown" };
   const confirmed = window.confirm(
-    `Επιβεβαίωση ${labels[action] || action}: η σύνδεση με τη Dorothy θα διακοπεί αμέσως.`
+    `Confirm ${labels[action] || action}: the connection to Dorothy will be interrupted immediately.`
   );
   if (!confirmed) return;
 
-  els.macActionStatus.textContent = `Προετοιμασία ${labels[action] || action}…`;
+  els.macActionStatus.textContent = `Preparing ${labels[action] || action}…`;
   try {
     const res = await apiFetch("/api/mac/power", {
       method: "POST",
       body: JSON.stringify({ action, confirmed: true }),
     });
     const data = await res.json();
-    if (!res.ok) throw new Error(data.error || "Η ενέργεια απέτυχε.");
+    if (!res.ok) throw new Error(data.error || "The action failed.");
   } catch (error) {
     els.macActionStatus.textContent = error.message;
   }
@@ -757,28 +757,28 @@ async function controlMacPower(action) {
 
 const CONTROL_ACTION_COPY = {
   lock: {
-    title: "Κλείδωμα Mac;",
-    text: "Η οθόνη θα κλειδώσει αμέσως. Οι εφαρμογές και η Dorothy θα συνεχίσουν να λειτουργούν.",
+    title: "Lock Mac?",
+    text: "The screen will lock immediately. Applications and Dorothy will keep running.",
     confirm: "Lock",
   },
   restart: {
-    title: "Επανεκκίνηση Mac;",
-    text: "Το Mac θα κάνει restart αμέσως. Αποθήκευσε πρώτα οποιαδήποτε ανοιχτή εργασία.",
+    title: "Restart Mac?",
+    text: "The Mac will restart immediately. Save any open work first.",
     confirm: "Restart",
   },
   shutdown: {
-    title: "Τερματισμός Mac;",
-    text: "Το Mac θα κλείσει αμέσως και η σύνδεση με τη Dorothy θα διακοπεί.",
+    title: "Shut down Mac?",
+    text: "The Mac will shut down immediately and the connection to Dorothy will be interrupted.",
     confirm: "Shutdown",
   },
   stop: {
-    title: "Kill Dorothy;",
-    text: "Θα σταματήσει μόνο το OpenClaw gateway. Το Control Center θα μείνει ενεργό για να την επαναφέρεις.",
+    title: "Kill Dorothy?",
+    text: "Only the OpenClaw gateway will stop. Control Center will stay active so you can bring it back.",
     confirm: "Kill Dorothy",
   },
   start: {
-    title: "Επαναφορά Dorothy;",
-    text: "Το OpenClaw gateway θα ξεκινήσει ξανά και η Dorothy θα επανέλθει online.",
+    title: "Restore Dorothy?",
+    text: "The OpenClaw gateway will start again and Dorothy will come back online.",
     confirm: "Restore Dorothy",
   },
 };
@@ -828,7 +828,7 @@ async function executeControlAction() {
 
   els.confirmControlBtn.disabled = true;
   els.controlCenter.setAttribute("aria-busy", "true");
-  els.controlCenterStatus.textContent = "Εκτέλεση εντολής…";
+  els.controlCenterStatus.textContent = "Running command…";
 
   try {
     const endpoint = pending.kind === "gateway" ? "/api/system/gateway" : "/api/mac/power";
@@ -837,14 +837,14 @@ async function executeControlAction() {
       body: JSON.stringify({ action: pending.action, confirmed: true }),
     });
     const data = await res.json();
-    if (!res.ok) throw new Error(data.error || "Η εντολή απέτυχε.");
+    if (!res.ok) throw new Error(data.error || "The command failed.");
 
     const action = pending.action;
     cancelControlAction();
     if (pending.kind === "gateway") {
       els.controlCenterStatus.textContent = action === "stop"
-        ? "Η Dorothy σταμάτησε. Μπορείς να την επαναφέρεις από εδώ."
-        : "Η Dorothy ξεκινά ξανά…";
+        ? "Dorothy has stopped. You can restore her from here."
+        : "Dorothy is starting up again…";
       await new Promise(resolve => window.setTimeout(resolve, 900));
       await Promise.all([
         loadControlCenterStatus(),
@@ -852,8 +852,8 @@ async function executeControlAction() {
       ]);
     } else {
       els.controlCenterStatus.textContent = action === "lock"
-        ? "Το Mac κλειδώνει."
-        : "Η εντολή στάλθηκε στο Mac.";
+        ? "The Mac is locking."
+        : "The command was sent to the Mac.";
     }
   } catch (error) {
     els.confirmControlBtn.disabled = false;
@@ -865,7 +865,7 @@ async function executeControlAction() {
 async function loadControlCenterStatus() {
   els.controlCenterState.dataset.state = "checking";
   els.controlCenterState.querySelector("span").textContent = "Checking";
-  els.controlCenterSummary.textContent = "Έλεγχος κατάστασης…";
+  els.controlCenterSummary.textContent = "Checking status…";
 
   try {
     const res = await apiFetch("/api/control-center/status");
@@ -874,7 +874,7 @@ async function loadControlCenterStatus() {
     renderControlCenterStatus(data.gatewayOnline === true);
   } catch {
     renderControlCenterStatus(false);
-    els.controlCenterSummary.textContent = "Mac online · άγνωστη κατάσταση Dorothy";
+    els.controlCenterSummary.textContent = "Mac online · Dorothy status unknown";
   }
 }
 
@@ -903,7 +903,7 @@ function showLogin() {
   els.financePanel.classList.add("hidden");
   els.workspacePanel?.classList.add("hidden");
   els.tokenInput.value = "";
-  setStatus("offline", "Κλειδωμένη");
+  setStatus("offline", "Locked");
 }
 
 async function showChat() {
@@ -911,7 +911,7 @@ async function showChat() {
   els.loginPanel.classList.add("hidden");
   els.chatPanel.classList.remove("hidden");
   els.financePanel.classList.add("hidden");
-  setStatus("idle", "Έτοιμη");
+  setStatus("idle", "Ready");
   if (window.DorothyFeatures?.showInitialView) {
     window.DorothyFeatures.showInitialView();
   } else {
@@ -925,7 +925,7 @@ async function showChat() {
 async function validateAndEnter(token) {
   els.loginError.textContent = "";
   els.saveTokenBtn.disabled = true;
-  els.saveTokenBtn.textContent = "Έλεγχος…";
+  els.saveTokenBtn.textContent = "Checking…";
   try {
     const res = await fetch("/api/auth/check", {
       headers: { "Authorization": `Bearer ${token}` },
@@ -938,10 +938,10 @@ async function validateAndEnter(token) {
     state.token = "";
     localStorage.removeItem("dorothy_token");
     showLogin();
-    els.loginError.textContent = "Το token δεν είναι σωστό.";
+    els.loginError.textContent = "The token is not correct.";
   } finally {
     els.saveTokenBtn.disabled = false;
-    els.saveTokenBtn.textContent = "Σύνδεση";
+    els.saveTokenBtn.textContent = "Sign in";
   }
 }
 
@@ -1018,7 +1018,7 @@ async function openSession(key, options = {}) {
   state.mode = options.mode || modeFromSessionKey(key);
   state.model = options.model || "";
   localStorage.setItem("dorothy_session", key);
-  setConversationTitle(options.title || "Νέα συζήτηση");
+  setConversationTitle(options.title || "New conversation");
   applyConversationMode();
   renderSessionList();
   closeSidebar();
@@ -1030,7 +1030,7 @@ async function openSession(key, options = {}) {
     return;
   }
 
-  setStatus("busy", "Φόρτωση");
+  setStatus("busy", "Loading");
   try {
     const res = await apiFetch(`/api/sessions/history?key=${encodeURIComponent(key)}`);
     const data = await res.json();
@@ -1049,7 +1049,7 @@ async function openSession(key, options = {}) {
 }
 
 function setConversationTitle(title) {
-  state.sessionTitle = title || "Νέα συζήτηση";
+  state.sessionTitle = title || "New conversation";
   els.conversationTitle.textContent = state.sessionTitle;
 }
 
@@ -1069,7 +1069,7 @@ async function showView(view, options = {}) {
   closeSidebar();
 
   if (finance) {
-    els.conversationTitle.textContent = "Οικονομικά";
+    els.conversationTitle.textContent = "Finance";
     els.conversationMode.classList.add("hidden");
     if (options.load !== false) await loadFinance();
   } else {
@@ -1103,8 +1103,8 @@ function displayModelName(modelId) {
 function displayModelRuntime(modelId) {
   const configured = state.aiModels.find(model => model.id === modelId);
   const isRemote = configured?.remote || /^google(?:-gemini-cli)?\//.test(String(modelId || ""));
-  if (isRemote) return `${configured?.provider || "Cloud API"} · επεξεργασία στο cloud`;
-  return `${configured?.provider || "Ollama"} · εκτελείται τοπικά στο Mac σου`;
+  if (isRemote) return `${configured?.provider || "Cloud API"} · processed in the cloud`;
+  return `${configured?.provider || "Ollama"} · runs locally on your Mac`;
 }
 
 function renderSessionList() {
@@ -1112,7 +1112,7 @@ function renderSessionList() {
   if (!state.sessions.length) {
     const empty = document.createElement("p");
     empty.className = "session-empty";
-    empty.textContent = "Δεν υπάρχουν ακόμα συζητήσεις.";
+    empty.textContent = "No conversations yet.";
     els.sessionList.appendChild(empty);
     return;
   }
@@ -1126,19 +1126,19 @@ function renderSessionList() {
     const mode = session.mode || modeFromSessionKey(session.key);
     row.classList.toggle("active", session.key === state.sessionKey);
     row.classList.toggle("ai", mode === "ai");
-    const meta = session.pending ? "Κενή" : relativeTime(session.updatedAt);
+    const meta = session.pending ? "Empty" : relativeTime(session.updatedAt);
     const modeLabel = mode === "dorothy" ? "" : `${getMode(mode).label} · `;
     button.innerHTML = `
       <span class="session-item-title"></span>
       <span class="session-item-meta">${modeLabel}${meta}</span>
     `;
-    button.querySelector(".session-item-title").textContent = session.title || "Νέα συζήτηση";
+    button.querySelector(".session-item-title").textContent = session.title || "New conversation";
     button.addEventListener("click", () => openSession(session.key, session));
     const deleteButton = document.createElement("button");
     deleteButton.type = "button";
     deleteButton.className = "session-delete";
-    deleteButton.setAttribute("aria-label", `Διαγραφή συζήτησης ${session.title || "Νέα συζήτηση"}`);
-    deleteButton.title = "Διαγραφή συζήτησης";
+    deleteButton.setAttribute("aria-label", `Delete conversation ${session.title || "New conversation"}`);
+    deleteButton.title = "Delete conversation";
     deleteButton.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3m-8 0 1 13h8l1-13M10 11v5m4-5v5"/></svg>';
     deleteButton.addEventListener("click", () => deleteSession(session));
     row.append(button, deleteButton);
@@ -1148,8 +1148,8 @@ function renderSessionList() {
 
 async function deleteSession(session) {
   if (state.busy || !session?.key) return;
-  const title = session.title || "Νέα συζήτηση";
-  if (!window.confirm(`Να διαγραφεί οριστικά η συζήτηση «${title}»;`)) return;
+  const title = session.title || "New conversation";
+  if (!window.confirm(`Permanently delete the conversation "${title}"?`)) return;
 
   try {
     if (!session.pending) {
@@ -1157,7 +1157,7 @@ async function deleteSession(session) {
         method: "DELETE",
       });
       const data = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(data.error || "Η διαγραφή απέτυχε.");
+      if (!response.ok) throw new Error(data.error || "The deletion failed.");
     }
 
     const wasActive = session.key === state.sessionKey;
@@ -1172,17 +1172,17 @@ async function deleteSession(session) {
     if (next) await openSession(next.key, next);
     else await createSession("dorothy");
   } catch (error) {
-    window.alert(error.message || "Η διαγραφή απέτυχε.");
+    window.alert(error.message || "The deletion failed.");
   }
 }
 
 function relativeTime(timestamp) {
   const seconds = Math.max(0, Math.floor((Date.now() - Number(timestamp || 0)) / 1000));
-  if (seconds < 60) return "Τώρα";
-  if (seconds < 3600) return `${Math.floor(seconds / 60)}λ`;
-  if (seconds < 86400) return `${Math.floor(seconds / 3600)}ω`;
-  if (seconds < 604800) return `${Math.floor(seconds / 86400)}μ`;
-  return new Date(timestamp).toLocaleDateString("el-GR", { day: "numeric", month: "short" });
+  if (seconds < 60) return "Now";
+  if (seconds < 3600) return `${Math.floor(seconds / 60)}m`;
+  if (seconds < 86400) return `${Math.floor(seconds / 3600)}h`;
+  if (seconds < 604800) return `${Math.floor(seconds / 86400)}d`;
+  return new Date(timestamp).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
 }
 
 function openSidebar() {
@@ -1209,7 +1209,7 @@ async function loadFinance(force = false) {
 
   els.financeStatus.classList.remove("hidden", "error");
   els.financeContent.classList.add("hidden");
-  els.financeStatus.textContent = "Φόρτωση οικονομικών…";
+  els.financeStatus.textContent = "Loading finances…";
   els.refreshFinanceBtn.disabled = true;
 
   try {
@@ -1233,7 +1233,7 @@ async function loadFinance(force = false) {
     renderPortfolio(state.portfolioData);
   } catch (error) {
     els.financeStatus.classList.add("error");
-    els.financeStatus.textContent = `Δεν φορτώθηκαν τα οικονομικά: ${error.message}`;
+    els.financeStatus.textContent = `Finances didn't load: ${error.message}`;
   } finally {
     els.refreshFinanceBtn.disabled = false;
   }
@@ -1242,7 +1242,7 @@ async function loadFinance(force = false) {
 async function syncAndLoadBanking() {
   els.syncBanksBtn.disabled = true;
   els.syncBanksBtn.classList.add("syncing");
-  els.bankSyncMeta.textContent = "Συγχρονισμός υπολοίπων και κινήσεων…";
+  els.bankSyncMeta.textContent = "Syncing balances and transactions…";
   try {
     const res = await apiFetch("/api/open-banking/sync", { method: "POST" });
     const result = await res.json();
@@ -1253,7 +1253,7 @@ async function syncAndLoadBanking() {
     state.bankData = overview;
     renderBanking(overview);
   } catch (error) {
-    els.bankSyncMeta.textContent = `Ο τραπεζικός συγχρονισμός απέτυχε: ${error.message}`;
+    els.bankSyncMeta.textContent = `Bank sync failed: ${error.message}`;
   } finally {
     els.syncBanksBtn.disabled = false;
     els.syncBanksBtn.classList.remove("syncing");
@@ -1262,7 +1262,7 @@ async function syncAndLoadBanking() {
 
 async function syncAndLoadFinance() {
   els.financeStatus.classList.remove("hidden", "error");
-  els.financeStatus.textContent = "Συγχρονισμός εσόδων από Elorus…";
+  els.financeStatus.textContent = "Syncing revenue from Elorus…";
   els.refreshFinanceBtn.disabled = true;
   els.refreshFinanceBtn.classList.add("syncing");
   try {
@@ -1273,7 +1273,7 @@ async function syncAndLoadFinance() {
     await loadFinance(true);
   } catch (error) {
     els.financeStatus.classList.add("error");
-    els.financeStatus.textContent = `Ο συγχρονισμός απέτυχε: ${error.message}`;
+    els.financeStatus.textContent = `Sync failed: ${error.message}`;
   } finally {
     els.refreshFinanceBtn.disabled = false;
     els.refreshFinanceBtn.classList.remove("syncing");
@@ -1296,32 +1296,32 @@ function renderFinance(data) {
   els.financeYear.value = selectedYear;
 
   els.metricRevenue.textContent = formatEuro(summary.revenue);
-  els.metricRevenueMeta.textContent = `${summary.invoiceCount || 0} παραστατικά`;
+  els.metricRevenueMeta.textContent = `${summary.invoiceCount || 0} invoices`;
   els.metricDirectCosts.textContent = formatEuro(summary.directCosts);
   els.metricCostsMeta.textContent = summary.directCostsEstimated > 0
-    ? `${formatEuro(summary.directCostsActual)} πραγματικά · ${formatEuro(summary.directCostsEstimated)} εκτίμηση`
-    : "Πραγματικά κόστη κατηγορίας";
+    ? `${formatEuro(summary.directCostsActual)} actual · ${formatEuro(summary.directCostsEstimated)} estimated`
+    : "Actual category costs";
   els.metricGrossProfit.textContent = formatEuro(summary.grossProfit);
-  els.metricGrossMargin.textContent = `${formatPercent(summary.grossMarginPercent)} μικτό margin`;
+  els.metricGrossMargin.textContent = `${formatPercent(summary.grossMarginPercent)} gross margin`;
   els.metricOperatingResult.textContent = formatEuro(summary.operatingResult);
-  els.metricOperatingMargin.textContent = `${formatPercent(summary.operatingMarginPercent)} λειτουργικό margin`;
+  els.metricOperatingMargin.textContent = `${formatPercent(summary.operatingMarginPercent)} operating margin`;
   els.metricTaxOutflows.textContent = formatEuro(summary.taxVatCashOutflows);
   const sources = data.sources || summary.sources || {};
   els.financeSyncMeta.textContent = sources.lastSyncedAt
-    ? `Elorus: ${new Date(sources.lastSyncedAt).toLocaleString("el-GR", {
+    ? `Elorus: ${new Date(sources.lastSyncedAt).toLocaleString("en-GB", {
       day: "numeric",
       month: "short",
       hour: "2-digit",
       minute: "2-digit",
     })}`
-    : "Έσοδα από το αρχικό MyDash snapshot";
+    : "Revenue from the initial MyDash snapshot";
 
   const coverage = summary.coverage || {};
   setQuality(els.qualityItems, els.qualityItemsBar, coverage.invoiceItemPercent);
   setQuality(els.qualityCosts, els.qualityCostsBar, coverage.actualCostRevenuePercent);
   els.qualityNote.textContent = coverage.unclassifiedRevenue > 0.005
-    ? `${formatEuro(coverage.unclassifiedRevenue)} εσόδων δεν έχουν αναλυτικές γραμμές και εμφανίζονται χωριστά.`
-    : "Όλα τα έσοδα της περιόδου έχουν ανάλυση γραμμών.";
+    ? `${formatEuro(coverage.unclassifiedRevenue)} of revenue has no line-item breakdown and is shown separately.`
+    : "All revenue for the period has line-item analysis.";
 
   renderFinanceChart(data.yearly || []);
   renderFinanceCategories(summary.categories || []);
@@ -1332,12 +1332,12 @@ function renderFinance(data) {
 
 function renderBanking(data) {
   if (!data) {
-    els.bankSyncMeta.textContent = "Τα τραπεζικά δεδομένα δεν είναι ακόμη διαθέσιμα.";
+    els.bankSyncMeta.textContent = "Bank data isn't available yet.";
     els.bankCashBalance.textContent = "—";
     els.bankInflows.textContent = "—";
     els.bankOutflows.textContent = "—";
     els.bankNetFlow.textContent = "—";
-    els.bankAccountsMeta.textContent = "Πάτησε συγχρονισμό";
+    els.bankAccountsMeta.textContent = "Tap sync";
     els.bankTransactionsMeta.textContent = "—";
     renderBankAccounts([]);
     renderBankCategories([]);
@@ -1351,16 +1351,16 @@ function renderBanking(data) {
   els.bankOutflows.textContent = formatEuro(summary.outflow);
   els.bankNetFlow.textContent = formatSignedEuro(summary.netFlow);
   els.bankNetFlow.classList.toggle("negative", Number(summary.netFlow) < 0);
-  els.bankAccountsMeta.textContent = `${summary.bankCount || 0} τράπεζες · ${summary.accountCount || 0} στοιχεία`;
-  els.bankTransactionsMeta.textContent = `${summary.transactionCount || 0} κινήσεις`;
+  els.bankAccountsMeta.textContent = `${summary.bankCount || 0} banks · ${summary.accountCount || 0} accounts`;
+  els.bankTransactionsMeta.textContent = `${summary.transactionCount || 0} transactions`;
   els.bankSyncMeta.textContent = data.lastSync?.finishedAt
-    ? `Τελευταία ενημέρωση ${new Date(data.lastSync.finishedAt).toLocaleString("el-GR", {
+    ? `Last updated ${new Date(data.lastSync.finishedAt).toLocaleString("en-GB", {
       day: "numeric",
       month: "short",
       hour: "2-digit",
       minute: "2-digit",
     })}`
-    : "Δεν έχει γίνει ακόμη συγχρονισμός.";
+    : "No sync has run yet.";
   renderBankAccounts(data.accounts || []);
   renderBankCategories(data.categories || []);
   renderBankTransactions(data.recentTransactions || []);
@@ -1374,10 +1374,10 @@ function renderPortfolio(data) {
 
   if (!data || !positions.length) {
     els.portfolioTotalValue.textContent = "—";
-    els.portfolioDayChange.textContent = "Δεν βρέθηκαν δομημένες θέσεις στη μνήμη.";
+    els.portfolioDayChange.textContent = "No structured positions found in memory.";
     els.portfolioDayChange.className = "";
-    els.portfolioMarketStatus.textContent = "Μη διαθέσιμο";
-    els.portfolioMeta.textContent = "Η υπόλοιπη καρτέλα οικονομικών λειτουργεί κανονικά.";
+    els.portfolioMarketStatus.textContent = "Not available";
+    els.portfolioMeta.textContent = "The rest of the finance tab works normally.";
     return;
   }
 
@@ -1389,8 +1389,8 @@ function renderPortfolio(data) {
   els.portfolioDayChange.textContent = total
     ? `${formatSignedCurrency(total.dayChangeValue, total.currency)}${euroTotal
       ? ` (${formatSignedCurrency(euroTotal.dayChangeValue, "EUR")})`
-      : ""} σήμερα`
-    : "Η τρέχουσα αξία δεν είναι διαθέσιμη.";
+      : ""} today`
+    : "The current value isn't available.";
   els.portfolioDayChange.className = total
     ? (Number(total.dayChangeValue) >= 0 ? "positive" : "negative")
     : "";
@@ -1398,10 +1398,10 @@ function renderPortfolio(data) {
   const quoted = positions.filter(position => Number.isFinite(position.price));
   const marketOpen = quoted.some(position => position.marketStatus === "open");
   els.portfolioMarketStatus.textContent = quoted.length
-    ? `${marketOpen ? "Αγορά ανοικτή" : "Αγορά κλειστή"} · ${data.providers.join(" + ")}`
-    : "Οι τιμές δεν είναι διαθέσιμες";
+    ? `${marketOpen ? "Market open" : "Market closed"} · ${data.providers.join(" + ")}`
+    : "Prices aren't available";
   els.portfolioMeta.textContent = data.asOf
-    ? `Ενημέρωση ${new Date(data.asOf).toLocaleString("el-GR", {
+    ? `Updated ${new Date(data.asOf).toLocaleString("en-GB", {
       day: "numeric",
       month: "short",
       hour: "2-digit",
@@ -1424,7 +1424,7 @@ function renderPortfolio(data) {
     const name = document.createElement("strong");
     name.textContent = position.name;
     const details = document.createElement("span");
-    details.textContent = `${position.symbol} · ${formatQuantity(position.quantity)} μετοχές · ${position.broker}`;
+    details.textContent = `${position.symbol} · ${formatQuantity(position.quantity)} shares · ${position.broker}`;
     copy.append(name, details);
     identity.append(mark, copy);
 
@@ -1436,8 +1436,8 @@ function renderPortfolio(data) {
       : "—";
     const change = document.createElement("span");
     change.textContent = Number.isFinite(position.changePercent)
-      ? `${formatSignedNumber(position.changePercent)}% σήμερα`
-      : position.quoteError || "Χωρίς τρέχουσα τιμή";
+      ? `${formatSignedNumber(position.changePercent)}% today`
+      : position.quoteError || "No current price";
     if (Number.isFinite(position.changePercent)) {
       change.className = position.changePercent >= 0 ? "positive" : "negative";
     }
@@ -1446,7 +1446,7 @@ function renderPortfolio(data) {
     const value = document.createElement("div");
     value.className = "portfolio-value";
     const valueLabel = document.createElement("span");
-    valueLabel.textContent = "Αξία θέσης";
+    valueLabel.textContent = "Position value";
     const valueAmount = document.createElement("strong");
     valueAmount.textContent = Number.isFinite(position.marketValue)
       ? `${formatCurrency(position.marketValue, position.currency)}${Number.isFinite(position.marketValueEur)
@@ -1463,7 +1463,7 @@ function renderPortfolio(data) {
 function renderBankAccounts(accounts) {
   els.bankAccountsList.innerHTML = "";
   if (!accounts.length) {
-    els.bankAccountsList.innerHTML = '<p class="bank-empty">Δεν υπάρχουν συγχρονισμένα υπόλοιπα.</p>';
+    els.bankAccountsList.innerHTML = '<p class="bank-empty">No synced balances.</p>';
     return;
   }
   for (const account of accounts) {
@@ -1489,7 +1489,7 @@ function renderBankCategories(categories) {
   els.bankCategoriesList.innerHTML = "";
   const max = Math.max(1, ...categories.map(row => Number(row.amount || 0)));
   if (!categories.length) {
-    els.bankCategoriesList.innerHTML = '<p class="bank-empty">Δεν υπάρχουν εκροές στην περίοδο.</p>';
+    els.bankCategoriesList.innerHTML = '<p class="bank-empty">No outflows in this period.</p>';
     return;
   }
   for (const category of categories.slice(0, 8)) {
@@ -1506,20 +1506,20 @@ function renderBankCategories(categories) {
 function renderBankTransactions(transactions) {
   els.bankTransactionsList.innerHTML = "";
   if (!transactions.length) {
-    els.bankTransactionsList.innerHTML = '<p class="bank-empty">Δεν υπάρχουν κινήσεις στην περίοδο.</p>';
+    els.bankTransactionsList.innerHTML = '<p class="bank-empty">No transactions in this period.</p>';
     return;
   }
   for (const transaction of transactions.slice(0, 18)) {
     const row = document.createElement("div");
     row.className = "bank-transaction-row";
-    const date = new Date(`${transaction.bookingDate}T12:00:00Z`).toLocaleDateString("el-GR", {
+    const date = new Date(`${transaction.bookingDate}T12:00:00Z`).toLocaleDateString("en-GB", {
       day: "numeric",
       month: "short",
     });
     row.innerHTML = `
       <time>${escapeHtml(date)}</time>
       <div>
-        <strong>${escapeHtml(transaction.description || transaction.counterparty || "Συναλλαγή")}</strong>
+        <strong>${escapeHtml(transaction.description || transaction.counterparty || "Transaction")}</strong>
         <span>${escapeHtml([transaction.bankName, transaction.categoryLabel].filter(Boolean).join(" · "))}</span>
       </div>
       <strong class="${Number(transaction.amount) < 0 ? "negative" : "positive"}">${formatSignedCurrency(transaction.amount, transaction.currency)}</strong>
@@ -1536,7 +1536,7 @@ function setQuality(label, bar, value) {
 
 function renderFinanceChart(rows) {
   if (!rows.length) {
-    els.financeChart.textContent = "Δεν υπάρχουν ιστορικά δεδομένα.";
+    els.financeChart.textContent = "No historical data available.";
     return;
   }
 
@@ -1581,7 +1581,7 @@ function renderFinanceChart(rows) {
   }).join("");
 
   els.financeChart.innerHTML = `
-    <svg viewBox="0 0 ${width} ${height}" role="img" aria-label="Έσοδα και λειτουργικό αποτέλεσμα ανά έτος">
+    <svg viewBox="0 0 ${width} ${height}" role="img" aria-label="Revenue and operating result by year">
       ${grid}
       <line x1="${padding.left}" y1="${zeroY}" x2="${width - padding.right}" y2="${zeroY}" class="chart-zero-line"/>
       ${bars}
@@ -1611,7 +1611,7 @@ function renderFinanceCategories(rows) {
     const source = document.createElement("td");
     const badge = document.createElement("span");
     badge.className = `cost-source ${row.costSource === "actual_category_cost" ? "actual" : "estimated"}`;
-    badge.textContent = row.costSource === "actual_category_cost" ? "Πραγματικό" : "Εκτίμηση";
+    badge.textContent = row.costSource === "actual_category_cost" ? "Actual" : "Estimated";
     source.appendChild(badge);
     tr.appendChild(source);
     els.financeCategories.appendChild(tr);
@@ -1625,7 +1625,7 @@ function renderRenewals(renewals) {
   if (!rows.length) {
     const empty = document.createElement("p");
     empty.className = "renewals-empty";
-    empty.textContent = "Δεν υπάρχουν αξιόπιστες ανανεώσεις στις επόμενες 90 ημέρες.";
+    empty.textContent = "No confident renewals in the next 90 days.";
     els.renewalsList.appendChild(empty);
     return;
   }
@@ -1646,8 +1646,8 @@ function renderRenewals(renewals) {
     dateText.textContent = formatDate(row.nextRenewalDate);
     const relative = document.createElement("span");
     relative.textContent = row.daysUntil < 0
-      ? `${Math.abs(row.daysUntil)} ημέρες εκπρόθεσμο`
-      : row.daysUntil === 0 ? "σήμερα" : `σε ${row.daysUntil} ημέρες`;
+      ? `${Math.abs(row.daysUntil)} days overdue`
+      : row.daysUntil === 0 ? "today" : `in ${row.daysUntil} days`;
     date.append(dateText, relative);
     const amount = document.createElement("div");
     amount.className = "renewal-amount";
@@ -1658,7 +1658,7 @@ function renderRenewals(renewals) {
 }
 
 function formatEuro(value) {
-  return new Intl.NumberFormat("el-GR", {
+  return new Intl.NumberFormat("en-GB", {
     style: "currency",
     currency: "EUR",
     minimumFractionDigits: 2,
@@ -1667,20 +1667,20 @@ function formatEuro(value) {
 
 function formatSignedNumber(value) {
   const number = Number(value || 0);
-  return `${number >= 0 ? "+" : "−"}${Math.abs(number).toLocaleString("el-GR", {
+  return `${number >= 0 ? "+" : "−"}${Math.abs(number).toLocaleString("en-GB", {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   })}`;
 }
 
 function formatQuantity(value) {
-  return Number(value || 0).toLocaleString("el-GR", {
+  return Number(value || 0).toLocaleString("en-GB", {
     maximumFractionDigits: 4,
   });
 }
 
 function formatCurrency(value, currency = "EUR") {
-  return new Intl.NumberFormat("el-GR", {
+  return new Intl.NumberFormat("en-GB", {
     style: "currency",
     currency: currency || "EUR",
     minimumFractionDigits: 2,
@@ -1698,18 +1698,18 @@ function formatSignedEuro(value) {
 }
 
 function formatPercent(value) {
-  return `${new Intl.NumberFormat("el-GR", { maximumFractionDigits: 1 }).format(Number(value || 0))}%`;
+  return `${new Intl.NumberFormat("en-GB", { maximumFractionDigits: 1 }).format(Number(value || 0))}%`;
 }
 
 function compactMoney(value) {
   const number = Number(value || 0);
-  if (Math.abs(number) >= 1000) return `${new Intl.NumberFormat("el-GR", { maximumFractionDigits: 0 }).format(number / 1000)}k`;
-  return new Intl.NumberFormat("el-GR", { maximumFractionDigits: 0 }).format(number);
+  if (Math.abs(number) >= 1000) return `${new Intl.NumberFormat("en-GB", { maximumFractionDigits: 0 }).format(number / 1000)}k`;
+  return new Intl.NumberFormat("en-GB", { maximumFractionDigits: 0 }).format(number);
 }
 
 function formatDate(value) {
-  if (!value) return "Χωρίς ημερομηνία";
-  return new Date(`${value}T12:00:00`).toLocaleDateString("el-GR", {
+  if (!value) return "No date";
+  return new Date(`${value}T12:00:00`).toLocaleDateString("en-GB", {
     day: "numeric",
     month: "short",
     year: "numeric",
@@ -1723,14 +1723,14 @@ function setStatus(status, label) {
 
 function updateIdleStatus() {
   if (state.systemReady === false) {
-    setStatus("degraded", "Μερικώς online");
+    setStatus("degraded", "Partially online");
     return;
   }
   if (state.systemReady === true) {
-    setStatus("idle", "Όλα online");
+    setStatus("idle", "All online");
     return;
   }
-  setStatus("idle", "Έτοιμη");
+  setStatus("idle", "Ready");
 }
 
 function setBusy(on) {
@@ -1740,13 +1740,13 @@ function setBusy(on) {
   els.voiceBtn.disabled = on;
   els.messageInput.disabled = on;
   document.querySelectorAll(".quick-actions button").forEach(btn => { btn.disabled = on; });
-  if (on) setStatus("busy", "Σκέφτεται");
+  if (on) setStatus("busy", "Thinking");
   else updateIdleStatus();
 }
 
 async function checkSystemStatus(options = {}) {
   if (!options.quiet && els.systemReadinessSummary) {
-    els.systemReadinessSummary.textContent = "Έλεγχος υπηρεσιών…";
+    els.systemReadinessSummary.textContent = "Checking services…";
   }
 
   try {
@@ -1764,7 +1764,7 @@ async function checkSystemStatus(options = {}) {
     state.systemReady = false;
     if (!state.busy) updateIdleStatus();
     if (els.systemReadinessSummary) {
-      els.systemReadinessSummary.textContent = `Ο έλεγχος απέτυχε: ${error.message}`;
+      els.systemReadinessSummary.textContent = `Check failed: ${error.message}`;
     }
     return null;
   }
@@ -1796,23 +1796,23 @@ function renderSystemStatus(data) {
   }
 
   const checked = data.checkedAt
-    ? new Date(data.checkedAt).toLocaleTimeString("el-GR", { hour: "2-digit", minute: "2-digit" })
+    ? new Date(data.checkedAt).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })
     : "";
   els.systemReadinessSummary.textContent = data.ready
-    ? `Όλα έτοιμα${checked ? ` · έλεγχος ${checked}` : ""}`
-    : `Χρειάζεται προσοχή${checked ? ` · έλεγχος ${checked}` : ""}`;
+    ? `All ready${checked ? ` · checked ${checked}` : ""}`
+    : `Needs attention${checked ? ` · checked ${checked}` : ""}`;
 
   const boot = data.bootAutomation || {};
-  const login = boot.autoLoginUser ? `automatic login: ${boot.autoLoginUser}` : "automatic login ανενεργό";
+  const login = boot.autoLoginUser ? `automatic login: ${boot.autoLoginUser}` : "automatic login inactive";
   els.bootAutomationStatus.className = `boot-status ${boot.ready ? "ready" : "warning"}`;
   els.bootAutomationStatus.textContent = boot.ready
-    ? `Cold boot έτοιμο · FileVault off · ${login}`
-    : `Cold boot μη έτοιμο · ${boot.fileVaultOff ? "FileVault off" : "FileVault ενεργό"} · ${login}`;
+    ? `Cold boot ready · FileVault off · ${login}`
+    : `Cold boot not ready · ${boot.fileVaultOff ? "FileVault off" : "FileVault on"} · ${login}`;
 }
 
 function renderWelcome() {
   const hour = new Date().getHours();
-  const greeting = hour < 12 ? "Καλημέρα" : hour < 18 ? "Καλησπέρα" : "Καλησπέρα";
+  const greeting = hour < 12 ? "Good morning" : hour < 18 ? "Good evening" : "Good evening";
   const mode = getMode();
   const welcome = document.createElement("section");
   welcome.className = `welcome welcome-${state.mode}`;
@@ -1821,25 +1821,25 @@ function renderWelcome() {
     const modelId = state.model || selectedAiModel();
     welcome.innerHTML = `
       <div class="welcome-mark" aria-hidden="true">AI</div>
-      <p class="welcome-kicker">Προσωπικό AI</p>
-      <h1>Τι θέλεις να εξερευνήσουμε;</h1>
+      <p class="welcome-kicker">Personal AI</p>
+      <h1>What do you want to explore?</h1>
       <p>${escapeHtml(displayModelName(modelId))} · ${escapeHtml(displayModelRuntime(modelId))}</p>
       <div class="welcome-hints">
-        <button type="button" data-welcome-prompt="Βοήθησέ με να οργανώσω τις σκέψεις μου για ένα θέμα.">Οργάνωσε μια ιδέα</button>
-        <button type="button" data-welcome-prompt="Κάνε αναζήτηση στο διαδίκτυο για τις πιο πρόσφατες εξελίξεις σε ένα θέμα που θα σου δώσω.">Αναζήτηση στο web</button>
-        <button type="button" data-welcome-prompt="Θέλω να δημιουργήσουμε μια απλή εικόνα. Ρώτησέ με τι να απεικονίζει.">Δημιουργία εικόνας</button>
+        <button type="button" data-welcome-prompt="Help me organize my thoughts on a topic.">Organize an idea</button>
+        <button type="button" data-welcome-prompt="Search the web for the latest developments on a topic I'll give you.">Search the web</button>
+        <button type="button" data-welcome-prompt="I want to create a simple image. Ask me what it should depict.">Generate an image</button>
       </div>
     `;
   } else {
     welcome.innerHTML = `
       <div class="welcome-mark" aria-hidden="true"></div>
-      <p class="welcome-kicker">${greeting}, χρήστη.</p>
-      <h1>Τι θέλεις να κάνουμε;</h1>
-      <p>Πώς μπορώ να σε βοηθήσω σήμερα;</p>
+      <p class="welcome-kicker">${greeting}.</p>
+      <h1>What do you want to do?</h1>
+      <p>How can I help you today?</p>
       <div class="welcome-hints">
-        <button type="button" data-welcome-prompt="Τι χρειάζεται την προσοχή μου σήμερα;">Τι επείγει σήμερα;</button>
-        <button type="button" data-welcome-prompt="Τι έχω στο ημερολόγιο τις επόμενες 24 ώρες;">Δες το πρόγραμμά μου</button>
-        <button type="button" data-welcome-prompt="Σκάναρε τις επικοινωνίες μου για πραγματικές εκκρεμότητες και κατέγραψέ τες σωστά σε Apple Notes με Reminder ή Calendar όπου χρειάζεται.">Δες εκκρεμότητες</button>
+        <button type="button" data-welcome-prompt="What needs my attention today?">What's urgent today?</button>
+        <button type="button" data-welcome-prompt="What do I have on my calendar in the next 24 hours?">See my schedule</button>
+        <button type="button" data-welcome-prompt="Scan my communications for real pending items and log them correctly in Apple Notes with a Reminder or Calendar entry where needed.">See pending items</button>
       </div>
     `;
   }
@@ -1862,7 +1862,7 @@ async function sendMessage(text) {
   setBusy(true);
   addUserMsg(text);
   const current = state.sessions.find(item => item.key === state.sessionKey);
-  const emptyTitles = new Set(["Νέα συζήτηση", "Νέο AI chat"]);
+  const emptyTitles = new Set(["New conversation", "New AI chat"]);
   if (current && (!current.title || emptyTitles.has(current.title))) {
     const shortTitle = text.length > 46 ? `${text.slice(0, 45).trimEnd()}…` : text;
     current.title = state.mode === "ai" ? `AI · ${shortTitle}` : shortTitle;
@@ -1964,15 +1964,15 @@ async function sendMessage(text) {
 // ─── communications quick actions ────────────────────────────────────────────
 
 const COMMS_PROMPTS = {
-  attention: "Τι χρειάζεται την προσοχή μου;",
-  replies:   "Ποιον πρέπει να απαντήσω;",
-  today:     "Τι ήρθε σήμερα;",
+  attention: "What needs my attention?",
+  replies:   "Who should I reply to?",
+  today:     "What came in today?",
 };
 
 const COMMS_EMPTY = {
-  attention: "Όλα καθαρά — τίποτα που να χρειάζεται άμεση προσοχή. ✨",
-  replies:   "Δεν υπάρχουν εκκρεμείς απαντήσεις αυτή τη στιγμή.",
-  today:     "Δεν έχουν φτάσει νέα μηνύματα σήμερα.",
+  attention: "All clear — nothing needs immediate attention. ✨",
+  replies:   "No pending replies right now.",
+  today:     "No new messages have arrived today.",
 };
 
 async function showCommunications(type) {
@@ -2030,9 +2030,9 @@ function renderTodayCommunications(mail, data) {
   }
 
   const sections = [
-    ["security", "**Ασφάλεια**"],
-    ["transactions", "**Παραγγελίες & χρήματα**"],
-    ["updates", "**Άλλες χρήσιμες ενημερώσεις**"],
+    ["security", "**Security**"],
+    ["transactions", "**Orders & money**"],
+    ["updates", "**Other useful updates**"],
   ];
   const blocks = [];
 
@@ -2046,40 +2046,40 @@ function renderTodayCommunications(mail, data) {
   });
 
   if (!blocks.length) {
-    blocks.push("Δεν υπάρχει κάτι ουσιαστικό στα σημερινά emails.");
+    blocks.push("Nothing substantial in today's emails.");
   }
 
-  const stats = [`${digest.groups.length} χρήσιμα θέματα από ${digest.totalMessages} emails`];
-  if (digest.noiseMessages) stats.push(`${digest.noiseMessages} χαμηλής προτεραιότητας κρύφτηκαν`);
-  if (digest.collapsedMessages) stats.push(`${digest.collapsedMessages} συναφείς ενημερώσεις συγχωνεύτηκαν`);
-  if (digest.omittedGroups) stats.push(`+${digest.omittedGroups} ακόμη χρήσιμα θέματα`);
+  const stats = [`${digest.groups.length} useful threads out of ${digest.totalMessages} emails`];
+  if (digest.noiseMessages) stats.push(`${digest.noiseMessages} low-priority hidden`);
+  if (digest.collapsedMessages) stats.push(`${digest.collapsedMessages} related updates merged`);
+  if (digest.omittedGroups) stats.push(`+${digest.omittedGroups} more useful threads`);
 
   blocks.push(`*${stats.join(" · ")}*`);
   if (typeof data.ageSeconds === "number") {
-    blocks.push(`*Ενημέρωση πριν ${formatAge(data.ageSeconds)}*`);
+    blocks.push(`*Updated ${formatAge(data.ageSeconds)} ago*`);
   }
   return blocks.join("\n\n");
 }
 
 function renderCommunications(mails, type, data) {
   if (!mails.length) {
-    let msg = COMMS_EMPTY[type] || "Δεν βρέθηκαν μηνύματα.";
+    let msg = COMMS_EMPTY[type] || "No messages found.";
     if (!data.cached && !(data.mail || []).length) {
-      msg += "\n\n*(Το cache email δεν έχει φορτώσει ακόμα — δοκίμασε ξανά σε λίγο.)*";
+      msg += "\n\n*(The email cache hasn't loaded yet — try again shortly.)*";
     }
     return msg;
   }
 
   const lines = mails.map(m => {
-    const sender = String(m.sender || "Άγνωστος").replace(/\s*<.*?>\s*/, "").trim() || "Άγνωστος";
-    const subject = m.subject || "(χωρίς θέμα)";
+    const sender = String(m.sender || "Unknown").replace(/\s*<.*?>\s*/, "").trim() || "Unknown";
+    const subject = m.subject || "(no subject)";
     const flags = (m.flagged ? " 🚩" : "") + (!m.read ? " 🔵" : "");
     return `**${sender}**${flags} — ${subject}  \n${formatMailTime(m.receivedAt)} · ${m.account}`;
   });
 
   let footer = "";
   if (typeof data.ageSeconds === "number") {
-    footer = `\n\n*Ενημερώθηκε πριν ${formatAge(data.ageSeconds)}*`;
+    footer = `\n\n*Updated ${formatAge(data.ageSeconds)} ago*`;
   }
 
   return lines.join("\n\n") + footer;
@@ -2092,23 +2092,23 @@ function formatMailTime(iso) {
 
   const now = new Date();
   if (d.toDateString() === now.toDateString()) {
-    return d.toLocaleTimeString("el-GR", { hour: "2-digit", minute: "2-digit" });
+    return d.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
   }
 
   const yesterday = new Date(now);
   yesterday.setDate(now.getDate() - 1);
-  if (d.toDateString() === yesterday.toDateString()) return "Χθες";
+  if (d.toDateString() === yesterday.toDateString()) return "Yesterday";
 
-  return d.toLocaleDateString("el-GR", { day: "2-digit", month: "2-digit" });
+  return d.toLocaleDateString("en-GB", { day: "2-digit", month: "2-digit" });
 }
 
 function formatAge(seconds) {
   if (seconds < 60) return `${seconds}s`;
   const minutes = Math.round(seconds / 60);
-  if (minutes === 1) return "1 λεπτό";
-  if (minutes < 60) return `${minutes} λεπτά`;
+  if (minutes === 1) return "1 minute";
+  if (minutes < 60) return `${minutes} minutes`;
   const hours = Math.round(minutes / 60);
-  return hours === 1 ? "1 ώρα" : `${hours} ώρες`;
+  return hours === 1 ? "1 hour" : `${hours} hours`;
 }
 
 // ─── message rendering ───────────────────────────────────────────────────────
@@ -2136,7 +2136,7 @@ function addThinking() {
 
   const label = document.createElement("span");
   label.className = "thinking-label";
-  label.textContent = "Σκέφτεται";
+  label.textContent = "Thinking";
 
   const elapsed = document.createElement("span");
   elapsed.className = "thinking-elapsed";
@@ -2208,14 +2208,14 @@ function buildReactionBar(plainText) {
   const bar = document.createElement("div");
   bar.className = "reactions";
 
-  const speakBtn = reactionBtn("▶", "Ανάγνωση απάντησης");
+  const speakBtn = reactionBtn("▶", "Read reply aloud");
   speakBtn.addEventListener("click", (e) => {
     e.stopPropagation();
     speak(plainText);
   });
 
-  const retry = reactionBtn("↻", "Νέα προσέγγιση");
-  const copy = reactionBtn("⧉", "Αντιγραφή απάντησης");
+  const retry = reactionBtn("↻", "Try a new approach");
+  const copy = reactionBtn("⧉", "Copy reply");
   copy.classList.add("copy");
 
   retry.addEventListener("click", () => {
@@ -2224,7 +2224,7 @@ function buildReactionBar(plainText) {
     retry.classList.add("active");
     retry.disabled = true;
     setTimeout(() =>
-      sendMessage("Δεν με κάλυψε αυτή η απάντηση. Μπορείς να το προσεγγίσεις διαφορετικά;"),
+      sendMessage("That reply didn't quite cover it. Can you approach it differently?"),
       250
     );
   });
@@ -2232,15 +2232,15 @@ function buildReactionBar(plainText) {
   copy.addEventListener("click", () => {
     navigator.clipboard?.writeText(plainText).then(() => {
       copy.textContent = "✓";
-      copy.setAttribute("aria-label", "Αντιγράφηκε");
+      copy.setAttribute("aria-label", "Copied");
       setTimeout(() => {
         copy.textContent = "⧉";
-        copy.setAttribute("aria-label", "Αντιγραφή απάντησης");
+        copy.setAttribute("aria-label", "Copy reply");
       }, 1600);
     });
   });
 
-  const stopBtn = reactionBtn("■", "Διακοπή ανάγνωσης");
+  const stopBtn = reactionBtn("■", "Stop reading aloud");
   stopBtn.addEventListener("click", (e) => {
     e.stopPropagation();
     audioStop();

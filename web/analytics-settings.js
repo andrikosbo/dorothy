@@ -70,10 +70,10 @@ function validateClient(input) {
   const clientId = String(input?.clientId || "").trim();
   const clientSecret = String(input?.clientSecret || "").trim();
   if (!/\.apps\.googleusercontent\.com$/.test(clientId)) {
-    return { ok: false, error: "Το Client ID πρέπει να τελειώνει σε .apps.googleusercontent.com" };
+    return { ok: false, error: "The Client ID must end in .apps.googleusercontent.com" };
   }
   if (clientSecret.length < 10) {
-    return { ok: false, error: "Το Client Secret δεν είναι έγκυρο." };
+    return { ok: false, error: "The Client Secret is not valid." };
   }
   return { ok: true, clientId, clientSecret };
 }
@@ -205,7 +205,7 @@ async function listProperties(runCommand) {
 
 async function saveSelectedProperty({ propertyId, propertyName }, runCommand) {
   const id = String(propertyId || "").replace(/[^0-9]/g, "");
-  if (!id) return { ok: false, error: "Μη έγκυρο property id." };
+  if (!id) return { ok: false, error: "Invalid property id." };
   await writeSecret(runCommand, PROPERTY_ID_SERVICE, id);
   await writeSecret(runCommand, PROPERTY_NAME_SERVICE, String(propertyName || "").slice(0, 120));
   return { ok: true, propertyId: id };
@@ -263,7 +263,7 @@ async function getOverview(runCommand) {
     ok: true,
     propertyId,
     propertyName: propertyName || "",
-    window: "28 ημέρες",
+    window: "28 days",
     totals: {
       users: totals.users,
       sessions: totals.sessions,

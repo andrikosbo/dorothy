@@ -10,13 +10,13 @@ function validateElorusSettings(input, hasExistingApiKey = false) {
   const organizationId = String(input?.organizationId || "").trim();
 
   if (!apiKey && !hasExistingApiKey) {
-    return { ok: false, error: "Το ELORUS_API_KEY είναι υποχρεωτικό." };
+    return { ok: false, error: "ELORUS_API_KEY is required." };
   }
   if (apiKey && !/^[A-Za-z0-9_-]{32,128}$/.test(apiKey)) {
-    return { ok: false, error: "Το ELORUS_API_KEY δεν έχει έγκυρη μορφή." };
+    return { ok: false, error: "ELORUS_API_KEY doesn't have a valid format." };
   }
   if (!/^\d{8,30}$/.test(organizationId)) {
-    return { ok: false, error: "Το ELORUS_ORGANIZATION_ID πρέπει να περιέχει μόνο ψηφία." };
+    return { ok: false, error: "ELORUS_ORGANIZATION_ID must contain only digits." };
   }
 
   return { ok: true, apiKey, organizationId };
@@ -44,7 +44,7 @@ async function saveElorusSettings(input, runCommand) {
   if (validated.apiKey) {
     const apiKeyResult = await writeSecret(runCommand, API_KEY_SERVICE, validated.apiKey);
     if (!apiKeyResult.ok) {
-      return { ok: false, error: "Δεν αποθηκεύτηκε το ELORUS_API_KEY στο Keychain." };
+      return { ok: false, error: "ELORUS_API_KEY wasn't saved to the Keychain." };
     }
   }
 
@@ -54,7 +54,7 @@ async function saveElorusSettings(input, runCommand) {
     validated.organizationId,
   );
   if (!organizationResult.ok) {
-    return { ok: false, error: "Δεν αποθηκεύτηκε το ELORUS_ORGANIZATION_ID στο Keychain." };
+    return { ok: false, error: "ELORUS_ORGANIZATION_ID wasn't saved to the Keychain." };
   }
 
   return {

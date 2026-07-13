@@ -9,10 +9,10 @@ function validateGeminiApiKey(input, hasExistingApiKey = false) {
   const apiKey = String(input?.apiKey || "").trim();
 
   if (!apiKey && !hasExistingApiKey) {
-    return { ok: false, error: "Το Gemini API key είναι υποχρεωτικό." };
+    return { ok: false, error: "The Gemini API key is required." };
   }
   if (apiKey && !/^AIza[A-Za-z0-9_-]{30,60}$/.test(apiKey)) {
-    return { ok: false, error: "Το Gemini API key πρέπει να ξεκινά με AIza." };
+    return { ok: false, error: "The Gemini API key must start with AIza." };
   }
 
   return { ok: true, apiKey };
@@ -37,7 +37,7 @@ async function saveGeminiSettings(input, runCommand) {
 
   const keychainResult = await writeSecret(runCommand, validated.apiKey);
   if (!keychainResult.ok) {
-    return { ok: false, error: "Δεν αποθηκεύτηκε το Gemini API key στο Keychain." };
+    return { ok: false, error: "The Gemini API key wasn't saved to the Keychain." };
   }
 
   const authResult = await runCommand(
@@ -57,7 +57,7 @@ async function saveGeminiSettings(input, runCommand) {
   if (!authResult.ok) {
     return {
       ok: false,
-      error: "Το key αποθηκεύτηκε στο Keychain, αλλά δεν ενεργοποιήθηκε στο OpenClaw.",
+      error: "The key was saved to the Keychain, but wasn't activated in OpenClaw.",
     };
   }
 

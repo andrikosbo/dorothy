@@ -50,8 +50,8 @@ test("communications expose cross-device dismiss and undo controls", () => {
   );
 
   assert.match(features, /data-mail-quick-dismiss/);
-  assert.match(features, /Dismiss · Διαβάστηκε/);
-  assert.match(features, /Αναίρεση/);
+  assert.match(features, /Dismiss · Read/);
+  assert.match(features, /Undo/);
   assert.match(server, /\/api\\\/communications\\\/\(\\d\+\)\\\/read/);
   assert.match(cache, /readStatus = options\.read/);
 });
@@ -65,7 +65,7 @@ test("settings use non-scrolling navigation and sessions expose delete controls"
   const server = fs.readFileSync(path.join(__dirname, "..", "server.js"), "utf8");
 
   assert.match(html, /class="settings-body"/);
-  assert.match(html, /aria-label="Κατηγορίες ρυθμίσεων"/);
+  assert.match(html, /aria-label="Settings categories"/);
   assert.match(app, /className = "session-delete"/);
   assert.match(app, /method: "DELETE"/);
   assert.match(server, /deleteStoredSession/);

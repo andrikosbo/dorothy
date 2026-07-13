@@ -84,10 +84,10 @@
   }
 
   function senderName(mail) {
-    return String((mail && mail.sender) || "Άγνωστος")
+    return String((mail && mail.sender) || "Unknown")
       .replace(/\s*<.*?>\s*/, "")
       .replace(/^"(.*)"$/, "$1")
-      .trim() || "Άγνωστος";
+      .trim() || "Unknown";
   }
 
   function isSameLocalDay(iso, now) {
@@ -221,45 +221,45 @@
 
     if (group.key.startsWith("security:apple")) {
       const details = [];
-      if (/\bsign(?:ed)? in\b/i.test(text)) details.push("σύνδεση στο iCloud μέσω browser");
-      if (/app-specific password/i.test(text)) details.push("δημιουργία app-specific password");
-      const action = details.length ? details.join(" και ") : "ειδοποίηση ασφαλείας λογαριασμού";
-      const check = details.length > 1 ? "Έλεγξέ τα" : "Έλεγξέ το";
-      return `**Apple Account** — ${action}. ${check} μόνο αν δεν το έκανες εσύ.`;
+      if (/\bsign(?:ed)? in\b/i.test(text)) details.push("signed in to iCloud via browser");
+      if (/app-specific password/i.test(text)) details.push("created an app-specific password");
+      const action = details.length ? details.join(" and ") : "account security notice";
+      const check = details.length > 1 ? "Check them" : "Check it";
+      return `**Apple Account** — ${action}. ${check} out if it wasn't you.`;
     }
 
     if (group.key.startsWith("security:netflix")) {
-      return "**Netflix** — νέα συσκευή χρησιμοποίησε τον λογαριασμό. Αν δεν ήταν δική σου, άλλαξε κωδικό.";
+      return "**Netflix** — a new device used the account. If it wasn't yours, change your password.";
     }
 
     if (group.key.startsWith("transaction:temu")) {
       const statuses = [];
-      if (/\bpickup\b/i.test(text) || /παραλαβ/i.test(text)) statuses.push("διαθέσιμη για παραλαβή");
-      if (/\bdelivered\b/i.test(text) || /παράδοσ/i.test(text)) statuses.push("καταγράφηκε παράδοση");
+      if (/\bpickup\b/i.test(text) || /παραλαβ/i.test(text)) statuses.push("available for pickup");
+      if (/\bdelivered\b/i.test(text) || /παράδοσ/i.test(text)) statuses.push("delivery recorded");
       if (/\brefund\b/i.test(text) || /επιστροφ/i.test(text) || /\bcredit received\b/i.test(text)) {
         const amount = text.match(/\b\d+[,.]\d{2}\s*€/);
-        statuses.push(amount ? `επιστροφή ${amount[0].replace(/\s+/g, "")} σε credit` : "ολοκληρώθηκε επιστροφή/πίστωση");
+        statuses.push(amount ? `refund of ${amount[0].replace(/\s+/g, "")} as credit` : "refund/credit completed");
       }
-      return `**Temu${orderId ? ` ${shortOrderId(orderId)}` : ""}** — ${joinGreek(statuses) || "νεότερη ενημέρωση παραγγελίας"}.`;
+      return `**Temu${orderId ? ` ${shortOrderId(orderId)}` : ""}** — ${joinGreek(statuses) || "latest order update"}.`;
     }
 
     if (group.key.startsWith("transaction:skroutz")) {
       const statuses = [];
-      if (/λάβαμε την παραγγελία|order/i.test(text)) statuses.push("η παραγγελία καταχωρήθηκε");
-      if (/revolut/i.test(text)) statuses.push("υπάρχει ενημέρωση πληρωμής Revolut");
-      if (/τιμολόγ|invoice/i.test(text)) statuses.push("το τιμολόγιο είναι διαθέσιμο");
-      return `**Skroutz${orderId ? ` #${orderId.replace(/^#/, "")}` : ""}** — ${joinGreek(statuses) || "νεότερη ενημέρωση παραγγελίας"}.`;
+      if (/λάβαμε την παραγγελία|order/i.test(text)) statuses.push("order was registered");
+      if (/revolut/i.test(text)) statuses.push("there's a Revolut payment update");
+      if (/τιμολόγ|invoice/i.test(text)) statuses.push("the invoice is available");
+      return `**Skroutz${orderId ? ` #${orderId.replace(/^#/, "")}` : ""}** — ${joinGreek(statuses) || "latest order update"}.`;
     }
 
     if (group.key === "updates:business") {
       const statuses = [];
-      if (/meta for business|διαφήμισή σας εγκρίθηκε/i.test(text)) statuses.push("η διαφήμιση Meta εγκρίθηκε");
-      if (/ga4|google analytics/i.test(text)) statuses.push("υπάρχουν νέα GA4 insights");
-      return `**Business** — ${joinGreek(statuses) || "νέες ενημερώσεις από τα εργαλεία σου"}.`;
+      if (/meta for business|διαφήμισή σας εγκρίθηκε/i.test(text)) statuses.push("the Meta ad was approved");
+      if (/ga4|google analytics/i.test(text)) statuses.push("there are new GA4 insights");
+      return `**Business** — ${joinGreek(statuses) || "new updates from your tools"}.`;
     }
 
     const latest = items[0];
-    return `**${senderName(latest)}** — ${truncate(latest.subject || "(χωρίς θέμα)", 120)}`;
+    return `**${senderName(latest)}** — ${truncate(latest.subject || "(no subject)", 120)}`;
   }
 
   function shortOrderId(orderId) {
@@ -270,7 +270,7 @@
   function joinGreek(values) {
     const unique = [...new Set(values)];
     if (unique.length < 2) return unique[0] || "";
-    return `${unique.slice(0, -1).join(", ")} και ${unique[unique.length - 1]}`;
+    return `${unique.slice(0, -1).join(", ")} and ${unique[unique.length - 1]}`;
   }
 
   function truncate(value, limit) {

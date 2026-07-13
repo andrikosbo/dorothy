@@ -35,8 +35,8 @@
       const today = new Date();
       const sameDay = d.toDateString() === today.toDateString();
       return sameDay
-        ? d.toLocaleTimeString("el-GR", { hour: "2-digit", minute: "2-digit" })
-        : d.toLocaleString("el-GR", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+        ? d.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })
+        : d.toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
     } catch {
       return "";
     }
@@ -86,7 +86,7 @@
   function render(items) {
     if (!els) return;
     if (!items.length) {
-      els.list.innerHTML = `<div class="notif-empty">Καμία ειδοποίηση.</div>`;
+      els.list.innerHTML = `<div class="notif-empty">No notifications.</div>`;
       return;
     }
     els.list.innerHTML = "";

@@ -48,7 +48,7 @@
 
   // ---- Speech recognition (the listening half) ----
   function startRecognition() {
-    if (!SR) { setPhase("listening", "Ο browser δεν υποστηρίζει φωνή"); return; }
+    if (!SR) { setPhase("listening", "This browser doesn't support voice"); return; }
     stopRecognition();
     finalText = "";
     const recog = new SR();
@@ -73,7 +73,7 @@
       if (phase === "listening") { try { recog.start(); } catch (e) {} }
     };
     try { recog.start(); } catch (e) {}
-    setPhase("listening", "Σε ακούω…");
+    setPhase("listening", "Listening…");
   }
 
   function stopRecognition() {
@@ -100,7 +100,7 @@
   function submit(text) {
     awaitingReply = true;
     stopRecognition();
-    setPhase("thinking", "Σκέφτεται…");
+    setPhase("thinking", "Thinking…");
     setTranscript(text);
     window.DorothyApp && window.DorothyApp.showView && window.DorothyApp.showView("chat", { load: false });
     window.DorothyApp && window.DorothyApp.sendMessage && window.DorothyApp.sendMessage(text);
@@ -112,7 +112,7 @@
     awaitingReply = false;
     const detail = event.detail || {};
     if (!detail.text) { startRecognition(); return; }
-    setPhase("speaking", "Μιλάει…");
+    setPhase("speaking", "Speaking…");
     setTranscript("");
     if (!detail.spoke && window.DorothyApp && window.DorothyApp.speak) {
       window.DorothyApp.speak(detail.text);
@@ -178,16 +178,16 @@
   // ---- Lifecycle ----
   async function start() {
     if (active) return;
-    if (!SR) { window.alert("Ο browser δεν υποστηρίζει φωνητική αναγνώριση — δοκίμασε Chrome."); return; }
+    if (!SR) { window.alert("This browser doesn't support voice recognition — try Chrome."); return; }
     active = true;
     overlay.classList.remove("hidden");
     overlay.setAttribute("aria-hidden", "false");
     launchBtn.classList.add("active");
-    setPhase("listening", "Ξεκινάει…");
+    setPhase("listening", "Starting…");
     setTranscript("");
     const gotMic = await ensureMic();
     if (audioCtx && audioCtx.state === "suspended") { try { await audioCtx.resume(); } catch (e) {} }
-    if (!gotMic) setPhase("listening", "Χωρίς πρόσβαση στο μικρόφωνο (η διακοπή δεν θα δουλεύει)");
+    if (!gotMic) setPhase("listening", "No microphone access (barge-in won't work)");
     startRecognition();
   }
 
