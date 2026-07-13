@@ -2132,7 +2132,7 @@ body:not(.authenticated) .app {
 .sidebar-logo {
   width: 34px;
   height: 34px;
-  filter: saturate(.4) hue-rotate(130deg) brightness(1.35);
+  filter: saturate(1.1) brightness(1.1);
 }
 
 .brand-version,
@@ -2387,7 +2387,7 @@ body:not(.authenticated) .app {
   color: transparent;
   background: url("/logo.png") center / contain no-repeat;
   box-shadow: none;
-  filter: saturate(.35) hue-rotate(130deg) brightness(1.45);
+  filter: saturate(1.15) brightness(1.15);
 }
 
 .welcome-kicker {
