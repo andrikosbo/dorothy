@@ -1,5 +1,8 @@
 # Dorothy
 
+[![CI](https://github.com/andrikosbo/dorothy/actions/workflows/ci.yml/badge.svg)](https://github.com/andrikosbo/dorothy/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
 A self-hosted, local-first personal AI assistant. Dorothy runs on your own Mac
 and combines a native-feeling web/PWA workspace, an [OpenClaw](https://openclaw.ai)
 tool plugin for safe Mac/communications/finance control, and an optional
@@ -11,6 +14,16 @@ publicly by default; remote access is meant to go through a private mesh such as
 
 > This is a clean, generic release. Bring your own credentials via the
 > `.env.example` templates — no keys, tokens, or personal data are included.
+
+## Screenshots
+
+All data below is synthetic (`DOROTHY_DEMO_MODE=1` — see [Try it without connecting anything](#try-it-without-connecting-anything)).
+
+| | |
+| --- | --- |
+| ![Today](docs/screenshots/01-today.png) | ![Communications](docs/screenshots/02-communications.png) |
+| ![Finance](docs/screenshots/03-finance-overview.png) | ![Analytics](docs/screenshots/06-analytics.png) |
+| ![Projects](docs/screenshots/05-projects.png) | ![Conversation](docs/screenshots/08-conversation.png) |
 
 ## What's inside
 
@@ -43,6 +56,22 @@ npm start                     # serves on http://127.0.0.1:3030
 
 See [`web/README.md`](web/README.md) for the full security model and feature
 list.
+
+### Try it without connecting anything
+
+```bash
+cd web
+cp .env.example .env
+echo "DOROTHY_WEB_TOKEN=$(openssl rand -hex 32)" >> .env
+echo "DOROTHY_DEMO_MODE=1" >> .env
+npm install
+npm start
+```
+
+With `DOROTHY_DEMO_MODE=1`, every real data source (Mail, iMessage, Calendar,
+a bank connection, Elorus, Google Analytics) is replaced by realistic fixture
+data from [`web/demo-data.js`](web/demo-data.js) — nothing on your Mac is
+touched. This is exactly how the screenshots above were produced.
 
 ## Quick start (plugin)
 
