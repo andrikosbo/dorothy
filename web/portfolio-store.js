@@ -3,6 +3,7 @@
 const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
+const demoData = require("./demo-data.js");
 
 const DEFAULT_CACHE_TTL_MS = 5 * 60 * 1000;
 const PORTFOLIO_START = "<!-- dorothy-portfolio:start -->";
@@ -183,6 +184,7 @@ async function fetchEuroRate(currency, fetchImpl) {
 }
 
 async function getPortfolioSnapshot(options = {}) {
+  if (demoData.DEMO_MODE) return demoData.demoPortfolio();
   const {
     force = false,
     fetchImpl = global.fetch,
@@ -215,7 +217,7 @@ async function getPortfolioSnapshot(options = {}) {
     } catch (error) {
       return {
         ...holding,
-        quoteError: "Η τρέχουσα τιμή δεν είναι διαθέσιμη.",
+        quoteError: "The current price isn't available.",
       };
     }
   }));
@@ -280,7 +282,7 @@ async function getPortfolioSnapshot(options = {}) {
     asOf: now.toISOString(),
     providers,
     fxProviders: [...new Set(fxProviders)],
-    note: "Οι θέσεις προέρχονται από τη μνήμη της Dorothy. Οι τιμές αγοράς μπορεί να έχουν καθυστέρηση.",
+    note: "Positions come from Dorothy's memory. Market prices may be delayed.",
   };
 
   if (useSharedCache) {

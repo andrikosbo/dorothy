@@ -8,6 +8,7 @@ const {
   buildCommunicationOverview,
   enrichCommunications,
 } = require("./communication-intelligence.js");
+const demoData = require("./demo-data.js");
 
 // ─── mail JXA (same script as the dorothy-control plugin) ───
 
@@ -250,6 +251,12 @@ function fetchMailInbox(limit = 20, recentDays = 7) {
 }
 
 async function refreshCache() {
+  if (demoData.DEMO_MODE) {
+    memoryCache = demoData.demoCommunications({ enrichCommunications, buildCommunicationOverview });
+    lastFetch = Date.now();
+    return memoryCache;
+  }
+
   // Dedup: if a refresh is already in flight, return its result
   if (fetchPromise) return fetchPromise;
 
@@ -316,6 +323,7 @@ async function refreshCache() {
 }
 
 function loadPersistedCache() {
+  if (demoData.DEMO_MODE) return false;
   try {
     if (fs.existsSync(CACHE_FILE)) {
       const data = JSON.parse(fs.readFileSync(CACHE_FILE, "utf8"));
@@ -349,6 +357,13 @@ function startCacheWorker(intervalMs = CACHE_TTL_MS) {
 }
 
 function getCachedCommunications() {
+  if (demoData.DEMO_MODE) {
+    if (!memoryCache) {
+      memoryCache = demoData.demoCommunications({ enrichCommunications, buildCommunicationOverview });
+      lastFetch = Date.now();
+    }
+    return { cached: true, ageSeconds: 0, ...memoryCache };
+  }
   const fresh = memoryCache && (Date.now() - lastFetch) < CACHE_TTL_MS * 2;
   if (fresh) {
     return {
@@ -420,7 +435,9 @@ async function markRead(mailId, options = {}) {
   if (!Number.isInteger(numericId) || numericId < 1) throw new Error("Invalid mail id");
   const account = String(options.account || "").trim().slice(0, 200);
   const read = options.read !== false;
-  const result = await executeMarkRead(numericId, account, read);
+  const result = demoData.DEMO_MODE
+    ? { ok: true, found: Boolean(memoryCache?.mail?.some(item => Number(item.mailId) === numericId)) }
+    : await executeMarkRead(numericId, account, read);
   if (!result.found) return { ok: false, found: false, mailId: numericId, read };
 
   const cached = memoryCache?.mail?.find(item =>

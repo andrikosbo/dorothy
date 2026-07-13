@@ -3,6 +3,7 @@
 const os = require("os");
 const path = require("path");
 const { DatabaseSync } = require("node:sqlite");
+const demoData = require("./demo-data.js");
 
 const DEFAULT_DATABASE_PATH = path.join(os.homedir(), ".openclaw", "data", "dorothy-finance.sqlite");
 const CATEGORY_LABELS = {
@@ -13,8 +14,8 @@ const CATEGORY_LABELS = {
   maintenance: "Maintenance",
   web_design: "Web design",
   marketing: "Marketing",
-  other: "Λοιπά",
-  unclassified: "Χωρίς ανάλυση",
+  other: "Other",
+  unclassified: "Unclassified",
 };
 const EXPENSE_MAP = {
   hosting_cost: "hosting",
@@ -254,6 +255,7 @@ function shifted(date, days) {
 }
 
 function getRenewals(options = {}, databasePath) {
+  if (demoData.DEMO_MODE) return demoData.demoFinanceOverview().renewals;
   const db = openDatabase(databasePath);
   try {
     const now = options.now || new Date();
@@ -321,6 +323,7 @@ function getRenewals(options = {}, databasePath) {
 }
 
 function getOverview(options = {}, databasePath) {
+  if (demoData.DEMO_MODE) return demoData.demoFinanceOverview();
   const db = openDatabase(databasePath);
   try {
     const source = revenueSource(db);

@@ -4,6 +4,7 @@ const fs = require("fs");
 const os = require("os");
 const path = require("path");
 const { spawn } = require("child_process");
+const demoData = require("./demo-data.js");
 
 const INDEX_ROOT = path.join(os.homedir(), "Dorothy_Index");
 
@@ -146,6 +147,7 @@ function run(argv) {
 }`;
 
 async function readCalendar(days = 2, limit = 20) {
+  if (demoData.DEMO_MODE) return demoData.demoCalendar();
   const result = await run("/usr/bin/osascript", [
     "-l", "JavaScript", "-e", CALENDAR_SCRIPT,
     JSON.stringify({ days, limit }),
@@ -155,6 +157,7 @@ async function readCalendar(days = 2, limit = 20) {
 }
 
 async function readReminders(days = 14, limit = 20) {
+  if (demoData.DEMO_MODE) return demoData.demoReminders();
   const result = await run("/usr/bin/osascript", [
     "-l", "JavaScript", "-e", REMINDERS_SCRIPT,
     JSON.stringify({ days, limit }),
@@ -194,6 +197,7 @@ function safeMtime(filePath) {
 }
 
 async function recentFiles(limit = 8) {
+  if (demoData.DEMO_MODE) return demoData.demoFiles();
   if (!fs.existsSync(INDEX_ROOT)) return [];
   const result = await run("/usr/bin/mdfind", [
     "-onlyin", INDEX_ROOT,

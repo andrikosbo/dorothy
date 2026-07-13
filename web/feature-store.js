@@ -4,6 +4,7 @@ const fs = require("fs");
 const os = require("os");
 const path = require("path");
 const crypto = require("crypto");
+const demoData = require("./demo-data.js");
 
 const DATA_DIR = path.join(os.homedir(), ".openclaw", "data");
 const STORE_PATH = path.join(DATA_DIR, "dorothy-web-features.json");
@@ -38,6 +39,7 @@ function createId(prefix) {
 }
 
 function listProjects() {
+  if (demoData.DEMO_MODE) return demoData.demoProjects();
   return readStore().projects
     .slice()
     .sort((a, b) => String(b.updatedAt).localeCompare(String(a.updatedAt)));
@@ -92,6 +94,7 @@ function updateProject(id, input) {
 }
 
 function listBrowserActions() {
+  if (demoData.DEMO_MODE) return demoData.demoBrowserActions();
   return readStore().browserActions
     .slice(0, 50)
     .sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)));
@@ -104,8 +107,8 @@ function classifyBrowserAction(instruction) {
     risk: risky ? "confirmation" : "read-only",
     requiresConfirmation: risky,
     summary: risky
-      ? "Η ενέργεια μπορεί να αλλάξει δεδομένα ή να μεταδώσει πληροφορίες."
-      : "Η ενέργεια περιορίζεται σε άνοιγμα, ανάγνωση ή σύνοψη.",
+      ? "This action may change data or submit information."
+      : "This action is limited to opening, reading, or summarizing.",
   };
 }
 

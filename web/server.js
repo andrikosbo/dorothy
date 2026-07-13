@@ -86,6 +86,7 @@ const PUBLIC = path.join(ROOT, "public");
 loadEnv(path.join(ROOT, ".env"));
 
 const communicationsCache = require("./communications-cache.js");
+const demoData = require("./demo-data.js");
 
 const HOST = process.env.HOST || "127.0.0.1";
 const PORT = Number(process.env.PORT || 3030);
@@ -101,6 +102,7 @@ const FINANCE_SYNC_SCRIPT = path.join(ROOT, "..", "backend", "scripts", "sync-el
 const NOTIFICATIONS_STORE = path.join(process.env.HOME || "", ".openclaw", "data", "dorothy-web-notifications.json");
 
 function readNotifications() {
+  if (demoData.DEMO_MODE) return demoData.demoNotifications();
   try {
     const parsed = JSON.parse(fs.readFileSync(NOTIFICATIONS_STORE, "utf8"));
     return Array.isArray(parsed) ? parsed : [];
@@ -110,6 +112,7 @@ function readNotifications() {
 }
 
 function writeNotifications(items) {
+  if (demoData.DEMO_MODE) return;
   fs.mkdirSync(path.dirname(NOTIFICATIONS_STORE), { recursive: true });
   const tmp = `${NOTIFICATIONS_STORE}.tmp`;
   fs.writeFileSync(tmp, JSON.stringify(items), "utf8");
@@ -150,8 +153,8 @@ const server = http.createServer(async (req, res) => {
         return openBankingCallbackPage(
           res,
           400,
-          "Η σύνδεση δεν ολοκληρώθηκε",
-          "Το αίτημα έληξε ή δεν είναι έγκυρο. Ξεκίνησε ξανά τη σύνδεση από την Dorothy.",
+          "Connection not completed",
+          "The request expired or is not valid. Start the connection again from Dorothy.",
         );
       }
 
@@ -162,7 +165,7 @@ const server = http.createServer(async (req, res) => {
         return openBankingCallbackPage(
           res,
           400,
-          "Η τράπεζα δεν συνδέθηκε",
+          "The bank didn't connect",
           providerError.slice(0, 300),
         );
       }
@@ -172,8 +175,8 @@ const server = http.createServer(async (req, res) => {
         return openBankingCallbackPage(
           res,
           400,
-          "Η σύνδεση δεν ολοκληρώθηκε",
-          "Δεν επιστράφηκε κωδικός εξουσιοδότησης.",
+          "Connection not completed",
+          "No authorization code was returned.",
         );
       }
 
@@ -183,16 +186,16 @@ const server = http.createServer(async (req, res) => {
         return openBankingCallbackPage(
           res,
           200,
-          "Η τράπεζα συνδέθηκε",
-          `Αποθηκεύτηκαν ${saved.accountCount} λογαριασμοί από ${authState.bankName}. Μπορείς να επιστρέψεις στην Dorothy.`,
+          "The bank connected",
+          `Saved ${saved.accountCount} accounts from ${authState.bankName}. You can return to Dorothy.`,
         );
       } catch (error) {
         console.error("dorothy: open banking callback failed:", error.message);
         return openBankingCallbackPage(
           res,
           502,
-          "Η σύνδεση δεν ολοκληρώθηκε",
-          "Η εξουσιοδότηση έγινε, αλλά δεν δημιουργήθηκε τραπεζική συνεδρία. Δοκίμασε ξανά από την Dorothy.",
+          "Connection not completed",
+          "Authorization succeeded, but no bank session was created. Try again from Dorothy.",
         );
       }
     }
@@ -200,32 +203,33 @@ const server = http.createServer(async (req, res) => {
     if (url.pathname === "/api/analytics/callback" && req.method === "GET") {
       const state = String(url.searchParams.get("state") || "");
       if (!state || !consumeAnalyticsAuthState(state)) {
-        return openBankingCallbackPage(res, 400, "Η σύνδεση δεν ολοκληρώθηκε",
-          "Το αίτημα έληξε ή δεν είναι έγκυρο. Ξεκίνησε ξανά από τις ρυθμίσεις Analytics.");
+        return openBankingCallbackPage(res, 400, "Connection not completed",
+          "The request expired or is not valid. Start again from the Analytics settings.");
       }
       const providerError = String(url.searchParams.get("error_description")
         || url.searchParams.get("error") || "");
       if (providerError) {
-        return openBankingCallbackPage(res, 400, "Το Google δεν συνδέθηκε", providerError.slice(0, 300));
+        return openBankingCallbackPage(res, 400, "Google didn't connect", providerError.slice(0, 300));
       }
       const code = String(url.searchParams.get("code") || "");
       if (!code) {
-        return openBankingCallbackPage(res, 400, "Η σύνδεση δεν ολοκληρώθηκε",
-          "Δεν επιστράφηκε κωδικός εξουσιοδότησης.");
+        return openBankingCallbackPage(res, 400, "Connection not completed",
+          "No authorization code was returned.");
       }
       try {
         await analyticsSettings.exchangeCodeForTokens({ code, runCommand });
-        return openBankingCallbackPage(res, 200, "Το Google Analytics συνδέθηκε",
-          "Επίστρεψε στην Dorothy και διάλεξε ποιο property θες να παρακολουθείς.");
+        return openBankingCallbackPage(res, 200, "Google Analytics connected",
+          "Return to Dorothy and choose which property you want to track.");
       } catch (error) {
         console.error("dorothy: analytics callback failed:", error.message);
-        return openBankingCallbackPage(res, 502, "Η σύνδεση δεν ολοκληρώθηκε",
-          "Η εξουσιοδότηση έγινε αλλά απέτυχε η ανταλλαγή token. Δοκίμασε ξανά.");
+        return openBankingCallbackPage(res, 502, "Connection not completed",
+          "Authorization succeeded but the token exchange failed. Try again.");
       }
     }
 
     if (url.pathname === "/api/open-banking/status" && req.method === "GET") {
       if (!authorized(req)) return json(res, 401, { ok: false, error: "Unauthorized" });
+      if (demoData.DEMO_MODE) return json(res, 200, demoData.demoOpenBankingStatus());
       return json(res, 200, {
         ok: true,
         configuration: getOpenBankingConfigurationStatus(),
@@ -235,13 +239,14 @@ const server = http.createServer(async (req, res) => {
 
     if (url.pathname === "/api/open-banking/overview" && req.method === "GET") {
       if (!authorized(req)) return json(res, 401, { ok: false, error: "Unauthorized" });
+      if (demoData.DEMO_MODE) return json(res, 200, demoData.demoOpenBankingOverview());
       try {
         return json(res, 200, getOpenBankingOverview({
           days: Number(url.searchParams.get("days") || 30),
         }));
       } catch (error) {
         console.error("dorothy: open banking overview failed:", error.message);
-        return json(res, 503, { ok: false, error: "Δεν φορτώθηκαν τα τραπεζικά δεδομένα." });
+        return json(res, 503, { ok: false, error: "Bank data didn't load." });
       }
     }
 
@@ -251,7 +256,7 @@ const server = http.createServer(async (req, res) => {
         return json(res, 200, await runOpenBankingSync());
       } catch (error) {
         console.error("dorothy: open banking sync failed:", error.message);
-        return json(res, 502, { ok: false, error: "Ο τραπεζικός συγχρονισμός απέτυχε." });
+        return json(res, 502, { ok: false, error: "Bank sync failed." });
       }
     }
 
@@ -273,8 +278,8 @@ const server = http.createServer(async (req, res) => {
         return json(res, error.status === 403 ? 409 : 502, {
           ok: false,
           error: error.status === 403
-            ? "Η εφαρμογή Enable Banking δεν έχει ενεργοποιηθεί ακόμη."
-            : "Δεν φορτώθηκαν οι διαθέσιμες ελληνικές τράπεζες.",
+            ? "The Enable Banking app hasn't been activated yet."
+            : "The available Greek banks didn't load.",
         });
       }
     }
@@ -307,8 +312,8 @@ const server = http.createServer(async (req, res) => {
         return json(res, error.status === 403 ? 409 : 502, {
           ok: false,
           error: error.status === 403
-            ? "Η εφαρμογή Enable Banking δεν έχει ενεργοποιηθεί ακόμη."
-            : "Δεν ξεκίνησε η τραπεζική εξουσιοδότηση.",
+            ? "The Enable Banking app hasn't been activated yet."
+            : "The bank authorization didn't start.",
         });
       }
     }
@@ -383,7 +388,7 @@ const server = http.createServer(async (req, res) => {
         .map(item => ({
           type: "mail",
           id: String(item.mailId || item.messageId || item.subject),
-          title: item.subject || "(χωρίς θέμα)",
+          title: item.subject || "(no subject)",
           subtitle: item.sender || item.account,
           excerpt: item.excerpt || "",
           updatedAt: item.receivedAt || "",
@@ -395,7 +400,7 @@ const server = http.createServer(async (req, res) => {
           type: "chat",
           id: item.key,
           title: item.title,
-          subtitle: `${item.mode.toUpperCase()} · ${item.messageCount} μηνύματα`,
+          subtitle: `${item.mode.toUpperCase()} · ${item.messageCount} messages`,
           updatedAt: item.updatedAt ? new Date(item.updatedAt).toISOString() : "",
         }));
       const projects = listProjects()
@@ -512,10 +517,10 @@ const server = http.createServer(async (req, res) => {
       try {
         const sessionKey = newWebSessionKey(getChatMode("dorothy"));
         const approval = action.requiresConfirmation
-          ? "Ο χρήστης είδε την προεπισκόπηση αυτής της ακριβούς ενέργειας και την ενέκρινε ρητά."
-          : "Πρόκειται για read-only ενέργεια.";
+          ? "The user saw the preview of this exact action and explicitly approved it."
+          : "This is a read-only action.";
         const result = await runAgent(
-          `Browser Action Mode.\n${approval}\nURL: ${action.url || "χρησιμοποίησε το κατάλληλο υπάρχον tab"}\nΕνέργεια: ${action.instruction}\nΧρησιμοποίησε τα dorothy_browser_* tools, τήρησε τα όρια επιβεβαίωσης και επέστρεψε σύντομο αποτέλεσμα.`,
+          `Browser Action Mode.\n${approval}\nURL: ${action.url || "use the appropriate existing tab"}\nAction: ${action.instruction}\nUse the dorothy_browser_* tools, respect the confirmation boundaries, and return a short result.`,
           sessionKey,
           getChatMode("dorothy"),
         );
@@ -763,6 +768,7 @@ const server = http.createServer(async (req, res) => {
 
     if (url.pathname === "/api/analytics/status" && req.method === "GET") {
       if (!authorized(req)) return json(res, 401, { ok: false, error: "Unauthorized" });
+      if (demoData.DEMO_MODE) return json(res, 200, demoData.demoAnalyticsStatus());
       return json(res, 200, await analyticsSettings.readAnalyticsSettings(runCommand));
     }
 
@@ -783,10 +789,10 @@ const server = http.createServer(async (req, res) => {
         return json(res, 200, { ok: true, authorizationUrl });
       } catch (error) {
         if (error.code === "client_not_configured") {
-          return json(res, 409, { ok: false, error: "Πρώτα αποθήκευσε Client ID & Secret." });
+          return json(res, 409, { ok: false, error: "Save the Client ID & Secret first." });
         }
         console.error("dorothy: analytics connect failed:", error.message);
-        return json(res, 502, { ok: false, error: "Δεν ξεκίνησε η εξουσιοδότηση Google." });
+        return json(res, 502, { ok: false, error: "Google authorization didn't start." });
       }
     }
 
@@ -796,7 +802,7 @@ const server = http.createServer(async (req, res) => {
         return json(res, 200, await analyticsSettings.listProperties(runCommand));
       } catch (error) {
         console.error("dorothy: analytics properties failed:", error.message);
-        return json(res, 502, { ok: false, error: "Δεν φορτώθηκαν τα GA4 properties." });
+        return json(res, 502, { ok: false, error: "GA4 properties didn't load." });
       }
     }
 
@@ -810,12 +816,13 @@ const server = http.createServer(async (req, res) => {
 
     if (url.pathname === "/api/analytics/overview" && req.method === "GET") {
       if (!authorized(req)) return json(res, 401, { ok: false, error: "Unauthorized" });
+      if (demoData.DEMO_MODE) return json(res, 200, demoData.demoAnalyticsOverview());
       try {
         const overview = await analyticsSettings.getOverview(runCommand);
         return json(res, overview.ok ? 200 : 409, overview);
       } catch (error) {
         console.error("dorothy: analytics overview failed:", error.message);
-        return json(res, 502, { ok: false, error: "Δεν φορτώθηκαν τα δεδομένα Analytics." });
+        return json(res, 502, { ok: false, error: "Analytics data didn't load." });
       }
     }
 
@@ -1345,7 +1352,7 @@ async function resolveAiModel(sessionKey, requestedModel) {
   const allowed = new Set(models.map(model => model.id));
   const requested = normalizeAiModelId(requestedModel);
   if (requested && !allowed.has(requested)) {
-    throw new Error("Το επιλεγμένο μοντέλο AI δεν είναι διαθέσιμο.");
+    throw new Error("The selected AI model isn't available.");
   }
 
   if (requested) return requested;
@@ -1440,6 +1447,7 @@ async function getTodayPayload(force = false) {
 }
 
 async function getSystemStatus() {
+  if (demoData.DEMO_MODE) return demoData.demoSystemStatus(APP_VERSION);
   const [
     openClaw,
     n8n,
@@ -1527,10 +1535,10 @@ function summarizePowerSchedule(raw) {
   const repeatingShutdown = text.match(/shutdown at (\d{1,2}:\d{2}[AP]M) every day/i)?.[1];
   const secondWake = text.match(/wakeorpoweron at (\d{2}\/\d{2}\/\d{4}) (\d{2}:\d{2})/i);
   const parts = [];
-  if (repeatingWake) parts.push(`Άνοιγμα ${formatPowerTime(repeatingWake)}`);
-  if (repeatingShutdown) parts.push(`Κλείσιμο ${formatPowerTime(repeatingShutdown)}`);
-  if (secondWake) parts.push(`Επόμενο wake ${secondWake[1]} ${secondWake[2]}`);
-  return parts.join(" · ") || "Δεν υπάρχει προγραμματισμένο power schedule.";
+  if (repeatingWake) parts.push(`Wake ${formatPowerTime(repeatingWake)}`);
+  if (repeatingShutdown) parts.push(`Shutdown ${formatPowerTime(repeatingShutdown)}`);
+  if (secondWake) parts.push(`Next wake ${secondWake[1]} ${secondWake[2]}`);
+  return parts.join(" · ") || "No scheduled power schedule.";
 }
 
 function formatPowerTime(value) {
@@ -1658,7 +1666,7 @@ function prepareChatMessage(originalMessage, sessionKey) {
 
 function sessionTitle(text) {
   const clean = String(text || "").replace(/\s+/g, " ").trim();
-  if (!clean) return "Νέα συζήτηση";
+  if (!clean) return "New conversation";
   return clean.length > 52 ? `${clean.slice(0, 51).trimEnd()}…` : clean;
 }
 
@@ -1885,7 +1893,7 @@ function openBankingCallbackPage(res, code, title, detail) {
     .replace(/"/g, "&quot;");
   const success = code >= 200 && code < 300;
   const body = `<!doctype html>
-<html lang="el">
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -1905,7 +1913,7 @@ function openBankingCallbackPage(res, code, title, detail) {
     <div class="mark">${success ? "✓" : "!"}</div>
     <h1>${escape(title)}</h1>
     <p>${escape(detail)}</p>
-    <p><a href="${CANONICAL_URL}">Επιστροφή στην Dorothy</a></p>
+    <p><a href="${CANONICAL_URL}">Return to Dorothy</a></p>
   </main>
 </body>
 </html>`;
